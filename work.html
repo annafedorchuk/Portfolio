@@ -561,9 +561,46 @@
       object-fit: cover; display: block; flex: 0 0 auto;
       pointer-events: none; -webkit-user-drag: none;
     }
+
+    /* ── Mobile gate — "open on desktop" screen shown only on phones (Figma 380-4025) ── */
+    .mobile-gate { display: none; }
+    @media (max-width: 768px) {
+      html, body { overflow: hidden; }
+      .mobile-gate {
+        display: flex; position: fixed; inset: 0; z-index: 2147483000;
+        background: var(--cream);
+        flex-direction: column; align-items: center; justify-content: center;
+        padding: 40px 24px;
+      }
+      .mg-inner { display: flex; flex-direction: column; align-items: center; text-align: center; }
+      .mg-mark { width: 78px; height: 78px; display: block; }
+      .mg-name { margin-top: 64px; width: min(274px, 78vw); }
+      .mg-name img { width: 100%; height: auto; display: block; }
+      .mg-text {
+        margin: 24px 0 0; width: 241px; max-width: 100%;
+        font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+        font-size: 12px; line-height: 17px; letter-spacing: -0.018em;
+        color: var(--gray); text-align: center;
+      }
+      .mg-mail {
+        position: absolute; bottom: 40px; left: 0; right: 0;
+        font-family: 'Xanh Mono', monospace; font-size: 16px; line-height: 24px;
+        color: var(--dark); text-align: center; text-decoration: none;
+      }
+    }
   </style>
 </head>
 <body>
+
+<!-- ══ MOBILE GATE (shown only on phones) ══ -->
+<div class="mobile-gate">
+  <div class="mg-inner">
+    <img class="mg-mark" src="mg-mark.svg" alt="">
+    <span class="mg-name"><img src="mg-wordmark.svg" alt="ANNA FEDORCHUK"></span>
+    <p class="mg-text">This portfolio is designed for the desktop experience. Please open it on a computer to explore the full work.</p>
+  </div>
+  <a class="mg-mail" href="mailto:anna.fedorchuk89@gmail.com">anna.fedorchuk89@gmail.com</a>
+</div>
 
 <!-- ══ PAGE TRANSITION ══ -->
 <div class="transition-overlay" id="transitionOverlay"></div>
