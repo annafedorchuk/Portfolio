@@ -1,0 +1,246 @@
+/* Shared project-overview popup styles */
+    /* ── Project popup — black transparent overlay + cream card (no scroll) ── */
+    .project-popup {
+      position: fixed; inset: 0; z-index: 500;     /* above header */
+      background: rgba(0, 0, 0, 0.7);     /* black overlay, 70% */
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.45s ease, visibility 0.45s;
+    }
+    .project-popup.open { opacity: 1; visibility: visible; }
+    .pp-inner {
+      position: absolute; left: 0; right: 0; top: 86px; bottom: 0;
+      background: #F0E7D9;
+      transform: translateY(100%);
+      transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow-y: auto; overflow-x: hidden;
+    }
+    .project-popup.open .pp-inner { transform: translateY(0); }
+    /* hero = first screen (minus the sticky bar) */
+    .pp-hero { position: relative; height: calc(100vh - 86px - 72px); }
+    .pp-body { display: contents; }
+
+    /* sticky title + close bar */
+    .pp-top {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 30px var(--m) 24px;
+      background: #F0E7D9;
+    }
+    .pp-title {
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 18px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--dark);
+    }
+    .pp-close {
+      border: none; background: none;
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 18px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--dark);
+      cursor: pointer;
+      text-decoration: underline; text-decoration-thickness: 0.5px; text-underline-offset: 5px;
+    }
+
+    /* left text column — bottom-aligned */
+    .pp-left {
+      position: absolute; left: var(--m); bottom: 20px;
+      /* stretch until 240px before the image (image left = 50% - 137px) */
+      width: calc(50% - 137px - 240px - var(--m));
+      display: flex; flex-direction: column; gap: 36px;
+    }
+    .pp-block { display: flex; flex-direction: column; gap: 9px; }
+    .pp-label {
+      font-family: 'Xanh Mono', monospace;
+      font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: #949494;
+    }
+    .pp-services, .pp-timeline {
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 18px; letter-spacing: -0.252px; color: #4D5153;
+    }
+    .pp-about { display: flex; flex-direction: column; gap: 8px; }
+    .pp-about p {
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 18px; letter-spacing: -0.252px; color: #4D5153;
+    }
+    .pp-website {
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 18px; letter-spacing: -0.252px; color: #4D5153;
+      text-decoration: underline; text-underline-offset: 3px; width: fit-content;
+    }
+
+    /* image — left edge aligned to the logo's vertical line, bottom-aligned */
+    .pp-right {
+      position: absolute;
+      left: calc(50% - 137px); right: var(--m);
+      top: 0; bottom: 20px;
+      overflow: hidden; background: #d8cfc2;
+    }
+    .pp-right img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* ── Big image after hero (with side padding) ── */
+    .pp-bigimg { width: 100%; padding: 0 var(--m); box-sizing: border-box; }
+    .pp-bigimg:empty { display: none; }
+    .pp-bigimg img, .pp-bigimg video { width: 100%; height: auto; display: block; }
+
+    /* ── Process accordion ── */
+    .pp-process { padding: 144px var(--m) 40px; }
+    .pp-process:empty { display: none; }
+    /* intro — aligned to the logo column (matches home process section) */
+    .pr-intro { margin-left: calc(50% - 137px); max-width: 620px; padding-bottom: 120px; }
+    .pr-heading {
+      font-family: 'Xanh Mono', monospace; font-weight: 400;
+      font-size: 35px; line-height: 44px; color: var(--dark); margin-bottom: 40px;
+    }
+    .pr-intro p {
+      font-family: 'Xanh Mono', monospace;
+      font-size: 16px; line-height: 24px; color: var(--dark);
+    }
+    .pr-intro p + p { margin-top: 28px; }
+    .pr-process-label { display: block; margin-top: 28px; font-family: 'Xanh Mono', monospace; font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: var(--muted); }
+
+    .pr-row { position: relative; padding: 28px 0; }
+    .pr-row::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 100%; height: 1px; background: var(--gray);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.9s ease-in-out;
+    }
+    .pr-rows.lines-in .pr-row::before { transform: scaleX(1); }
+    .pr-rows.lines-in .pr-row:nth-child(1)::before { transition-delay: 0s; }
+    .pr-rows.lines-in .pr-row:nth-child(2)::before { transition-delay: 0.1s; }
+    .pr-rows.lines-in .pr-row:nth-child(3)::before { transition-delay: 0.2s; }
+    .pr-rows.lines-in .pr-row:nth-child(4)::before { transition-delay: 0.3s; }
+    .pr-rows.lines-in .pr-row:nth-child(5)::before { transition-delay: 0.4s; }
+    .pr-rows.lines-in .pr-row:nth-child(6)::before { transition-delay: 0.5s; }
+    .pr-rows .pr-row:last-child { border-bottom: 1px solid var(--gray); }
+
+    .pr-num {
+      position: absolute; left: 0; top: 28px;
+      font-family: 'Xanh Mono', monospace; font-size: 14px; letter-spacing: -0.6px; color: var(--muted);
+    }
+    .pr-dot { position: absolute; right: 0; top: 36px; width: 5px; height: 5px; border-radius: 50%; background: var(--dark); }
+    .pr-main { margin-left: calc(50% - 137px); max-width: 560px; }
+    .pr-title {
+      display: block; cursor: pointer;
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 19px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--dark);
+    }
+    .pr-content {
+      max-height: 0; overflow: hidden; opacity: 0;
+      transition: max-height 0.6s cubic-bezier(0.22,1,0.36,1), opacity 0.5s ease, margin-top 0.6s ease;
+    }
+    .pr-row.open .pr-content { max-height: 820px; opacity: 1; margin-top: 22px; }
+    .pr-desc {
+      font-family: 'Xanh Mono', monospace;
+      font-size: 16px; line-height: 24px; color: var(--dark); margin-bottom: 24px;
+    }
+    .pr-deliv-label { display: block; font-family: 'Xanh Mono', monospace; font-size: 16px; color: var(--muted); margin-bottom: 12px; }
+    .pr-deliv { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .pr-deliv li {
+      position: relative; padding-left: 14px;
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 12px; line-height: 17px; letter-spacing: -0.018em; color: var(--gray);
+    }
+    .pr-deliv li::before { content: ''; position: absolute; left: 0; top: 7px; width: 3px; height: 3px; border-radius: 50%; background: var(--gray); }
+
+    /* gallery sections below the hero — images centered, capped, evenly spaced */
+    .pp-gallery {
+      max-width: 1240px; margin: 0 auto;
+      padding: 240px var(--m) 0;
+      display: flex; flex-direction: column; gap: 288px; align-items: center;
+      width: 100%;
+    }
+    .pp-gallery:empty { display: none; }
+    .pp-grow {
+      display: flex; flex-wrap: wrap; gap: 40px;
+      justify-content: center; align-items: center; width: 100%;
+    }
+    .pp-grow img, .pp-grow video {
+      max-height: 620px; max-width: 100%; width: auto; height: auto;
+      object-fit: contain; display: block;
+    }
+    /* full-width media row (e.g. efiros gallery 1 video) */
+    .pp-gfull { width: 100%; }
+    .pp-gfull img, .pp-gfull video { width: 100%; height: auto; display: block; }
+
+    /* ── Composite gallery sections (overlapping images, from Figma) ── */
+    .pp-comp { position: relative; margin: 288px auto 0; }
+    .pp-comp:empty { display: none; }
+    .pp-comp.comp5 { margin-top: 140px; margin-bottom: 160px; }
+
+    /* text block after the slider — aligned to the logo column */
+    .pp-text { margin-top: 140px; padding: 0 var(--m); }
+    .pp-text:empty { display: none; }
+    .pp-text-col { margin-left: calc(50% - 137px); max-width: 620px; }
+    .pp-text-h {
+      font-family: 'Xanh Mono', monospace; font-weight: 400;
+      font-size: 35px; line-height: 44px; color: var(--dark); margin-bottom: 40px;
+    }
+    .pp-text-col p { font-family: 'Xanh Mono', monospace; font-size: 16px; line-height: 24px; color: var(--dark); }
+    .pp-text-col p + p { margin-top: 28px; }
+    .pp-comp img, .pp-comp video { position: absolute; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pp-comp .comp-item { position: absolute; overflow: hidden; }
+
+    /* gallery 4 — navy + laptop (top-right) + family (bottom-left) */
+    .pp-comp.comp4 { width: min(900px, calc(100% - 2*var(--m))); aspect-ratio: 860 / 756; }
+    .comp4 .c-navy   { left: 22%;   top: 8.6%; width: 59.5%; height: 84.6%; z-index: 1; }
+    .comp4 .c-laptop { left: 66.2%; top: 0;    width: 33.8%; height: 48.1%; z-index: 2; }
+    .comp4 .c-family { left: 0;     top: 54%;  width: 32.3%; height: 46%;   z-index: 2; }
+
+    /* gallery 5 — landscape (top-right) + framed card (bottom-left) */
+    .pp-comp.comp5 { width: min(945px, calc(100% - 2*var(--m))); aspect-ratio: 945 / 1027; }
+    .comp5 .c-land { left: 38.4%; top: 0;     width: 61.6%; height: 70.8%; z-index: 1; }
+    .comp5 .c-card { left: 0;     top: 41.6%; width: 50.8%; height: 58.4%; z-index: 2; }
+
+    /* aura gallery 1 — yoga (left) + black "aura" block (center) + neck/logo card (right)
+       positions derived from Figma frame 1440 × 988 */
+    .pp-gallery .pp-comp { margin: 0; }
+    .pp-comp.aura1 { width: 100%; aspect-ratio: 1440 / 988; }
+    .aura1 .ci1 { left: 61.53%; top: 20.24%; width: 18.96%; height: 34.54%; z-index: 3; } /* neck + logo card (right) */
+    .aura1 .ci2 { left: 30.73%; top: 14.57%; width: 38.54%; height: 70.85%; z-index: 1; } /* black "aura" block (center) */
+    .aura1 .ci3 { left: 5.35%;  top: 25.51%; width: 29.58%; height: 56.07%; z-index: 2; } /* yoga (left) */
+
+    /* end gallery — images placed after the closing text block */
+    .pp-endgallery { padding-top: 144px; padding-bottom: 160px; gap: 40px; }
+
+    /* efiros final composite — "You see activity" grey block + navy logo + photo
+       positions derived from Figma frame 1440 × 1085 (all slots keep 0.8 ratio → no crop) */
+    .pp-comp.efiros3 { width: 100%; aspect-ratio: 1440 / 1020; } /* cropped to lowest image so bottom gap = 160px */
+    .efiros3 .ci1 { left: 7.92%;  top: 13.73%; width: 44.72%; height: 78.92%; z-index: 0; } /* 1.png — grey "You see activity" (left) */
+    .efiros3 .ci2 { left: 39.72%; top: 58.43%; width: 23.54%; height: 41.57%; z-index: 2; } /* 2.png — office photo (center, front) */
+    .efiros3 .ci3 { left: 61.74%; top: 26.41%; width: 30.35%; height: 53.56%; z-index: 1; } /* 3.png — navy E logo (right) */
+
+    /* gamma gallery 1 — monitor screenshot (right) + black terminal card (left, front)
+       positions from Figma frame 1443 × 872 */
+    .pp-comp.gamma1 { width: 100%; aspect-ratio: 1443 / 872; }
+    .gamma1 .ci1 { left: 50.94%; top: 16.06%; width: 39.36%; height: 62.50%; z-index: 1; } /* monitor (right) */
+    .gamma1 .ci2 { left: 40.33%; top: 37.39%; width: 21.14%; height: 46.56%; z-index: 2; } /* black card (left, front) */
+
+    /* gamma final composite — black code card (left) + building/gamma video (right, front)
+       positions from Figma frame 1441 × 985 */
+    .pp-comp.gamma4 { width: 100%; aspect-ratio: 1441 / 845; } /* cropped to lowest image so bottom gap = 160px */
+    .gamma4 .ci1 { left: 18.39%; top: 16.57%; width: 25.88%; height: 51.95%; z-index: 1; } /* code card (left) */
+    .gamma4 .ci2 { left: 39.14%; top: 32.66%; width: 33.52%; height: 67.34%; z-index: 2; } /* gamma video (right, front) */
+
+    /* acecare gallery 1 — portrait mock (left) + smaller shot (right) — frame 1443×1093 */
+    .pp-comp.acecare1 { width: 100%; aspect-ratio: 1443 / 1093; }
+    .acecare1 .ci1 { left: 9.94%;  top: 13.18%; width: 44.63%; height: 73.65%; z-index: 1; } /* man photo (left, big) */
+    .acecare1 .ci2 { left: 63.58%; top: 29.46%; width: 26.47%; height: 41.08%; z-index: 2; } /* navy card (right, small) */
+
+    /* acecare final composite — frame 1440×1085 cropped to lowest image so bottom gap = 160px */
+    .pp-comp.acecare3 { width: 100%; aspect-ratio: 1440 / 945; }
+    .acecare3 .ci1 { left: 7.92%;  top: 14.81%; width: 44.72%; height: 85.19%; z-index: 1; } /* tall mock (left) */
+    .acecare3 .ci2 { left: 61.74%; top: 28.51%; width: 30.35%; height: 57.80%; z-index: 2; } /* shot (right) */
+
+    /* draggable autoslider */
+    .pp-slider {
+      overflow: hidden;
+      padding: 288px 0 0;
+      cursor: grab;
+      user-select: none;
+    }
+    .pp-slider:empty { display: none; }
+    .pp-slider.grabbing { cursor: grabbing; }
+    .pp-track { display: flex; gap: 8px; width: max-content; will-change: transform; }
+    .pp-track img, .pp-track video {
+      width: 72vw; height: auto; max-height: 82vh;
+      object-fit: cover; display: block; flex: 0 0 auto;
+      pointer-events: none; -webkit-user-drag: none;
+    }

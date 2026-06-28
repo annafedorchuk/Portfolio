@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anna Fedorchuk — Product Designer</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Xanh+Mono:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --cream: #FFFCF7;
+      --cream-alt: #FAF6F0;
+      --dark: #0D0D0D;
+      --gray: #4D5153;
+      --muted: #949494;
+      --m: 20px;
+      --gap: 8px;
+    }
+
+    html { scrollbar-gutter: stable; }
+    body { background: var(--cream); font-family: 'Xanh Mono', monospace; overflow-x: hidden; }
+
+    /* ── HEADER (fixed) ── */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 32px var(--m); height: 90px;
+      mix-blend-mode: exclusion;
+      pointer-events: none;
+    }
+    header > * { pointer-events: all; }
+    .nav-left  { display: flex; align-items: center; gap: 8px; }
+    .nav-right { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+    .nav-dot   { width: 4px; height: 4px; background: #fff; border-radius: 50%; flex-shrink: 0; }
+    header a {
+      font-size: 20px; line-height: 20px; letter-spacing: 0.5px;
+      text-transform: uppercase; color: #fff; text-decoration: none;
+      cursor: pointer;
+    }
+    .header-logo {
+      display: flex;
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer !important;
+    }
+    .header-logo * { cursor: pointer !important; }
+    .header-logo svg { height: 26px; width: auto; fill: #fff; }
+
+    /* ── FOOTER (fixed) ── */
+    footer {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px var(--m) 56px;
+      mix-blend-mode: exclusion;
+      pointer-events: none;
+    }
+    footer > * { pointer-events: all; }
+    .footer-left  { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+    .footer-reach { font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: rgba(255,255,255,0.4); }
+    .footer-email { font-size: 16px; line-height: 24px; color: #fff; text-decoration: none; }
+    .footer-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex: 1; }
+    .footer-socials-label { font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: rgba(255,255,255,0.4); }
+    .footer-socials { display: flex; gap: 16px; }
+    .footer-socials a { font-size: 16px; line-height: 24px; color: #fff; text-decoration: none; }
+    .footer-socials a:hover { text-decoration: none; }
+
+    /* ── Page transition ── */
+    .transition-overlay {
+      position: fixed; inset: 0; z-index: 99998;
+      background: #F0E7D9;
+      transform: translateY(100%);
+      transition: transform 0.8s cubic-bezier(.76,0,.24,1);
+      pointer-events: none;
+      will-change: transform;
+    }
+    .transition-logo {
+      position: fixed; left: 50%; top: 45px;
+      z-index: 100000;
+      mix-blend-mode: exclusion;
+      opacity: 0;
+      transform: translate(-50%, -50%) translateY(calc(50vh - 45px));
+      transition: transform 1.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+      will-change: transform;
+    }
+    .transition-logo svg { height: 26px; width: auto; fill: #fff; display: block; }
+    .transition-logo.show { opacity: 1; }
+    .transition-logo.docked { transform: translate(-50%, -50%) translateY(0); }
+    .header-logo.logo-hidden { visibility: hidden; }
+
+    /* Custom cursor */
+    .cursor-dot {
+      position: fixed; z-index: 9999;
+      width: 10px; height: 10px;
+      background: #0D0D0D;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      transition: width 0.3s ease, height 0.3s ease;
+    }
+    .cursor-ring { display: none; }
+
+    /* ── HERO ZONE (scroll animation) ── */
+    .hero-zone { height: 200vh; }
+
+    .hero-sticky {
+      position: sticky; top: 0; height: 100vh;
+      overflow: hidden; background: var(--cream);
+    }
+
+    /* Description text — visible in row state, fades as photos scatter */
+    .hero-desc {
+      position: absolute;
+      /* logo SVG width = 274px, centered → starts at 50vw - 137px */
+      left: calc(50% - 137px); top: 128px;
+      width: calc(477 / 1440 * 100%); max-width: 477px;
+      font-size: 16px; line-height: 24px; color: var(--dark);
+      opacity: 1; z-index: 5; pointer-events: none;
+    }
+
+    /* Photo container — each photo is absolutely positioned by JS */
+    .hero-photos { position: absolute; inset: 0; }
+    .hero-photo  { position: absolute; overflow: visible; }
+    .photo-clip  { width: 100%; height: 100%; overflow: hidden; }
+    .photo-clip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Hover label — appears below each photo in scatter state */
+    .hero-label {
+      position: absolute;
+      top: calc(100% + 10px); left: 0;
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 11px; line-height: 16px; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--dark);
+      white-space: nowrap;
+      opacity: 0; transition: opacity 0.2s ease;
+      pointer-events: none;
+    }
+    .hero-photo:hover .hero-label { opacity: 1; }
+
+    /* Clickable hero photos */
+    .hero-photo[data-url] {
+      cursor: pointer;
+    }
+
+    /* Hero video hover state */
+    .hero-video-main { display: block !important; }
+    .hero-video-hover { display: none !important; }
+    .hero-image-main { display: block !important; }
+    .hero-photo:hover .hero-video-main { display: none !important; }
+    .hero-photo:hover .hero-image-main { display: none !important; }
+    .hero-photo:hover .hero-video-hover { display: block !important; }
+
+    /* Hero cursor */
+    .hero-cursor {
+      position: fixed; z-index: 10000; pointer-events: none;
+      transform: translate(-50%, -50%);
+      opacity: 0; transition: opacity 0.2s ease;
+      mix-blend-mode: exclusion;
+      width: 45px; height: 45px;
+      border-radius: 50%;
+      background-color: #E8E8E8;
+      display: flex; align-items: center; justify-content: center;
+      color: #0D0D0D;
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 20px;
+      font-weight: 300;
+      text-align: center;
+      line-height: 1.2;
+      letter-spacing: 0.5px;
+    }
+    .hero-cursor.visible { opacity: 1; }
+
+    /* ── CONTENT ── */
+
+
+    /* Intro */
+    .intro-section { display: flex; justify-content: flex-start; padding: 80px var(--m) 144px; }
+    .intro-inner {
+      width: min(calc(634/1440 * 100vw), 634px);
+      margin-left: calc(50vw - 137px - var(--m));
+      display: flex; flex-direction: column; gap: 64px;
+    }
+    .intro-text { display: flex; flex-direction: column; gap: 48px; }
+
+    .h-lg { font-size: 35px; line-height: 44px; color: var(--dark); font-weight: 400; }
+    .h-lg-wide { font-size: clamp(22px, calc(35/1440 * 100vw), 48px); line-height: 1.26; color: var(--dark); }
+
+    .body-copy { font-size: 16px; line-height: 24px; color: var(--dark); }
+    .body-copy p + p { margin-top: 28px; }
+    .body-copy-narrow { max-width: 541px; }
+
+    .muted { font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: var(--muted); }
+
+    .link-list { display: flex; flex-direction: column; gap: 10px; }
+    .lnk { display: flex; align-items: center; gap: 8px; text-decoration: none; cursor: pointer !important; }
+    .lnk * { cursor: pointer !important; }
+    .dot-d { width: 4px; height: 4px; background: var(--dark); border-radius: 50%; flex-shrink: 0; }
+    .cursor-dot.cursor-hover { width: 10px; height: 10px; }
+    .lnk-label {
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 28px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--dark);
+      cursor: pointer;
+    }
+
+    /* Work section */
+    .work-section { background: var(--cream-alt); padding: 144px var(--m); }
+    .work-label {
+      font-size: 35px; line-height: 44px; color: var(--dark);
+      margin-bottom: 56px;
+    }
+    .work-grid {
+      position: relative;
+      /* height scales with vw to preserve stagger proportions */
+      height: calc(1637/1440 * (100vw - 40px) + 80px);
+    }
+    .wcard { position: absolute; display: flex; flex-direction: column; gap: 16px; cursor: pointer; }
+    .wy  { font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: var(--gray); }
+    .wi  { overflow: hidden; background: #ccc; align-self: stretch; }
+    .wi img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .wt  {
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 28px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--dark);
+    }
+
+    /* Card positions & widths as % of inner width (1400px at 1440) */
+    /* Heights use same scale: px/1400 * innerWidth */
+    .wc1 { left: 0;                        top: 0; width: calc(415/1400 * 100%); }
+    .wc2 { left: calc(188/1400 * 100%);    top: calc(688/1400 * (100vw - 40px)); width: calc(415/1400 * 100%); }
+    .wc3 { left: calc(469/1400 * 100%);    top: calc(1160/1400* (100vw - 40px)); width: calc(555/1400 * 100%); }
+    .wc4 { left: calc(563/1400 * 100%);    top: calc(162/1400 * (100vw - 40px)); width: calc(649/1400 * 100%); }
+    .wc1 .wi { height: calc(311/1400 * (100vw - 40px)); }
+    .wc2 .wi { height: calc(311/1400 * (100vw - 40px)); }
+    .wc3 .wi { height: calc(416/1400 * (100vw - 40px)); }
+    .wc4 .wi { height: calc(365/1400 * (100vw - 40px)); }
+
+    /* Services */
+    .services-section { padding: 144px var(--m) 0; }
+    .services-intro {
+      margin-left: calc(50vw - 137px - var(--m));
+      max-width: 662px;
+      display: flex; flex-direction: column; gap: 64px;
+      padding-bottom: 80px;
+    }
+    .services-intro-inner { display: flex; flex-direction: column; gap: 48px; }
+    .svc-heading { font-size: 35px; line-height: 44px; color: var(--dark); font-weight: 400; }
+    .svc-body { font-size: 16px; line-height: 24px; color: var(--dark); max-width: 560px; }
+    .svc-body p + p { margin-top: 28px; }
+
+    .svc-list { display: flex; flex-direction: column; gap: 0; padding-bottom: 120px; }
+    .svc-row {
+      display: flex; align-items: center; justify-content: flex-start;
+      padding: 24px 0; position: relative;
+    }
+    .svc-row::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0;
+      width: 100%; height: 1px; background: var(--gray);
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+    .svc-row.line-animate::after {
+      animation: divider-draw 1.2s ease-in-out forwards;
+    }
+    .svc-row.line-animate.no-re-animate::after {
+      animation: none !important;
+      transform: scaleX(1) !important;
+      opacity: 1 !important;
+    }
+    .svc-row.line-animate.expanded-active::after {
+      animation: line-down 0.5s ease forwards !important;
+      transform-origin: center bottom;
+      visibility: hidden;
+    }
+    .svc-row.line-animate.closing::after {
+      animation: line-up 0.5s ease forwards !important;
+    }
+    .svc-row {
+      cursor: pointer !important;
+      --divider-distance: 0px;
+    }
+    .svc-row:hover .svc-name {
+      transform: translateX(32px);
+    }
+    .svc-row:hover .svc-dot {
+      animation: pulse-dot 1.4s ease-in-out infinite;
+    }
+    .svc-row[data-service="01"].line-animate::after {
+      animation-delay: 0s;
+    }
+    .svc-row[data-service="02"].line-animate::after {
+      animation-delay: 0.2s;
+    }
+    .svc-row[data-service="03"].line-animate::after {
+      animation-delay: 0.4s;
+    }
+    .svc-row[data-service="04"].line-animate::after {
+      animation-delay: 0.6s;
+    }
+    .svc-row[data-service="05"].line-animate::after {
+      animation-delay: 0.8s;
+    }
+    @keyframes divider-draw {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+    @keyframes line-down {
+      0% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(var(--divider-distance, 16px));
+        opacity: 0;
+      }
+    }
+    @keyframes line-up {
+      0% {
+        transform: translateY(var(--divider-distance, 16px));
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    .svc-row.expanded-active { border-bottom: none; }
+    .svc-num { font-size: 14px; line-height: 20px; letter-spacing: -0.6px; color: var(--muted); width: 27px; flex-shrink: 0; }
+    .svc-right {
+      display: flex; align-items: center; justify-content: space-between; gap: 4px;
+      /* logo left edge = 50vw - 137px; minus section padding (20px) and svc-num (27px) */
+      margin-left: calc(50vw - 184px); flex: 1;
+    }
+    .svc-name {
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 28px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--dark);
+      transition: transform 0.3s ease;
+      cursor: pointer !important;
+    }
+    .svc-dot {
+      width: 4px; height: 4px; background: var(--dark); border-radius: 50%;
+      transition: transform 0.3s ease;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(2.5); }
+    }
+    .svc-row {
+      cursor: pointer !important;
+    }
+    .svc-row:hover .svc-name {
+      transform: translateX(32px);
+    }
+    .svc-row:hover .svc-dot {
+      animation: pulse-dot 1.4s ease-in-out infinite;
+    }
+
+    /* Expanded service row */
+    .svc-row-exp {
+      display: flex; align-items: flex-start; justify-content: flex-start; padding: 0; border: none;
+      max-height: 0; overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.5s ease, max-height 0.5s ease, padding 0.5s ease, border 0.5s ease;
+    }
+    .svc-row-exp.expanded-active {
+      max-height: 600px;
+      padding: 8px 0 48px 0;
+      border-bottom: 1px solid var(--gray);
+      opacity: 1;
+      transition: opacity 0.5s ease, max-height 0.5s ease, padding 0.5s ease, border 0.5s ease;
+    }
+    .svc-exp-content {
+      display: flex; flex-direction: column; gap: 26px; margin-left: calc(50vw - 157px); flex: 1;
+    }
+    .svc-exp-text { font-size: 16px; line-height: 24px; color: var(--dark); max-width: 534px; }
+    .svc-work-label { font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: var(--muted); }
+    .svc-work-img { width: 480px; height: 360px; overflow: hidden; background: transparent; }
+    .svc-work-img img { width: 100%; height: 100%; object-fit: contain; }
+
+    /* Quote */
+    .quote-section { position: relative; height: 800vh; }
+    .quote-sticky { position: sticky; top: 0; height: 100vh; overflow: hidden; background: var(--cream); }
+    .qp { position: absolute; overflow: hidden; background: #ccc; will-change: transform, opacity; }
+    .qp img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    /* set 1 — left (aspect-ratio keeps images uncropped at any width) */
+    .qp1 { left: calc( 20/1440*100% + 120px); top: calc(50vh - 200px); width: calc( 85/1440*100%); aspect-ratio: 85/113; }
+    .qp2 { left: calc(208/1440*100% + 120px); top: calc(50vh + 41px); width: calc( 85/1440*100%); aspect-ratio: 85/113; }
+    .qp3 { left: calc(301/1440*100% + 120px); top: calc(50vh + 41px); width: calc(166/1440*100%); aspect-ratio: 166/113; }
+    .qp4 { left: calc(937/1440*100% + 120px); top: calc(50vh - 173px); width: calc(180/1440*100%); aspect-ratio: 180/240; }
+    /* set 2 — right (enters during phase 2) */
+    .qp5 { left: 62%; top: calc(50vh - 230px); width: calc( 85/1440*100%); height: 113px; opacity: 0; }
+    .qp6 { left: 74%; top: calc(50vh - 56px);  width: calc( 85/1440*100%); height: 113px; opacity: 0; }
+    .qp7 { left: 82%; top: calc(50vh + 118px); width: calc( 85/1440*100%); height: 113px; opacity: 0; }
+    .qp8 { left: 50%; top: calc(50vh - 173px); width: calc(180/1440*100%); height: 240px; opacity: 0; }
+    /* set 3 — right (enters during phase 3) */
+    .qp9  { left: 62%; top: calc(50vh - 230px); width: calc( 85/1440*100%); height: 113px; opacity: 0; }
+    .qp10 { left: 74%; top: calc(50vh - 56px);  width: calc( 85/1440*100%); height: 113px; opacity: 0; }
+    .qp11 { left: 82%; top: calc(50vh + 118px); width: calc( 85/1440*100%); height: 113px; opacity: 0; }
+    .qp12 { left: 50%; top: calc(50vh - 173px); width: calc(180/1440*100%); height: 240px; opacity: 0; }
+    .quote-block {
+      position: absolute;
+      left: calc(50% - 137px); top: calc(50vh - 101px);
+      width: calc(560/1440*100%);
+      display: flex; flex-direction: column; gap: 29px;
+      mix-blend-mode: exclusion;
+      will-change: opacity;
+    }
+    .quote-block.q2 { opacity: 0; }
+    .quote-block.q3 { opacity: 0; }
+    .qt { font-size: 16px; line-height: 24px; color: #fff; max-width: 468px; }
+    .qa { font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: var(--muted); }
+
+    /* Process */
+    .process-section { padding: 144px var(--m); }
+    .process-intro {
+      margin-left: calc(50vw - 137px - var(--m));
+      max-width: 662px;
+      display: flex; flex-direction: column; gap: 64px;
+      margin-bottom: 80px;
+    }
+    .process-intro-inner { display: flex; flex-direction: column; gap: 48px; }
+    .proc-heading { font-size: 35px; line-height: 44px; color: var(--dark); font-weight: 400; }
+    .proc-body { font-size: 16px; line-height: 24px; color: var(--dark); max-width: 560px; }
+    .proc-body p + p { margin-top: 28px; }
+
+    .process-cards { display: flex; gap: var(--gap); overflow: hidden; }
+    .pcard {
+      flex: 1; background: var(--cream-alt);
+      display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+      gap: 112px; padding: 80px 32px 32px 32px;
+    }
+    .picon { width: 148px; height: 132px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .picon img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+    .pcontent { display: flex; flex-direction: column; gap: 4px; align-self: stretch; }
+    .ptitle {
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 14px; line-height: 28px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--dark);
+    }
+    .pdesc {
+      font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+      font-size: 12px; line-height: 17px; letter-spacing: -0.018em; color: var(--gray);
+    }
+
+    /* Project Showcase Slider */
+    .showcase-section { height: 100vh; position: relative; display: flex; justify-content: space-between; align-items: center; gap: 0; padding: 0 var(--m); }
+    .showcase-left { flex: 0 0 auto; display: flex; flex-direction: column; gap: 16px; cursor: pointer !important; }
+    .sc-label { font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: var(--muted); cursor: pointer !important; }
+    .sc-featured-img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 550px; height: 550px; object-fit: cover; display: block; background: #ccc; opacity: 1; transition: opacity 0.4s ease-in-out; cursor: none; }
+    .sc-featured-img:hover { cursor: none; }
+    .sc-featured-img.fade-out { opacity: 0; }
+    .showcase-right { flex: 0 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    .sc-title { font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif; font-size: 14px; line-height: 19px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--dark); max-width: 400px; cursor: pointer !important; }
+    .sc-counter { font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: var(--muted); }
+    /* Directional cursor for showcase */
+    .sc-cursor-el {
+      position: fixed; z-index: 10000; pointer-events: none;
+      transform: translate(-50%, -50%);
+      opacity: 0; transition: opacity 0.2s ease;
+      mix-blend-mode: exclusion;
+    }
+    .sc-cursor-el.sc-cur-visible { opacity: 1; }
+
+    /* Bottom spacer for fixed footer */
+    .footer-spacer { height: 132px; }
+
+  </style>
+  <link rel="stylesheet" href="project-popup.css">
+</head>
+<body>
+
+
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="hero-cursor" id="heroCursor">
+  <span>↗</span>
+</div>
+
+<!-- ══ PAGE TRANSITION ══ -->
+<div class="transition-overlay" id="transitionOverlay"></div>
+<div class="transition-logo" id="transitionLogo">
+    <svg viewBox="0 0 274 26" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 25.6579V24.4947H1.9619L8.36585 0.342107H9.84653L16.2505 24.4947H18.6196V25.6579H9.88355V24.4947H13.6223L11.4753 16.3868H5.36747L3.2575 24.4947H5.84869V25.6579H0ZM8.40286 4.72105L5.66361 15.2921H11.1791L8.40286 4.72105Z"/>
+      <path d="M34.0927 26L24.6533 5.61053V24.4947H27.7628V25.6579H21.0257V24.4947H23.3948V1.50526H21.0257V0.342107H24.8014L33.7225 19.6368V1.50526H30.6131V0.342107H37.3502V1.50526H34.9811V26H34.0927Z"/>
+      <path d="M53.7117 26L44.2724 5.61053V24.4947H47.3818V25.6579H40.6447V24.4947H43.0138V1.50526H40.6447V0.342107H44.4204L53.3415 19.6368V1.50526H50.2321V0.342107H56.9692V1.50526H54.6001V26H53.7117Z"/>
+      <path d="M58.8571 25.6579V24.4947H60.819L67.2229 0.342107H68.7036L75.1076 24.4947H77.4766V25.6579H68.7406V24.4947H72.4793L70.3324 16.3868H64.2245L62.1146 24.4947H64.7058V25.6579H58.8571ZM67.2599 4.72105L64.5207 15.2921H70.0362L67.2599 4.72105Z"/>
+      <path d="M99.2797 25.6579V24.4947H102.389V1.50526H99.2797V0.342107H114.864V7.66316H113.827L113.309 4.00263C113.087 2.36053 112.063 1.53947 110.237 1.53947H104.98V11.2553H110.2V6.91053H111.31V16.7632H110.2V12.4184H104.98V24.4947H110.977V25.6579H99.2797Z"/>
+      <path d="M118.899 25.6579V24.4947H122.008V1.50526H118.899V0.342107H134.113V7.66316H133.076L132.558 4.00263C132.336 2.36053 131.312 1.53947 129.486 1.53947H124.599V11.2553H129.375V6.91053H130.559V16.7632H129.375V12.4184H124.599V24.4605H129.856C131.657 24.4605 132.669 23.6281 132.891 21.9632L133.446 17.6526H134.483V25.6579H118.899Z"/>
+      <path d="M138.777 25.6579V24.4947H141.886V1.50526H138.777V0.342107H145.773C147.328 0.342107 148.673 0.707019 149.808 1.43684C150.943 2.14386 151.881 3.10175 152.621 4.31053C153.362 5.5193 153.917 6.87632 154.287 8.38158C154.657 9.88684 154.842 11.4263 154.842 13C154.842 14.5737 154.657 16.1132 154.287 17.6184C153.917 19.1237 153.362 20.4807 152.621 21.6895C151.881 22.8982 150.943 23.8675 149.808 24.5974C148.673 25.3044 147.328 25.6579 145.773 25.6579H138.777ZM145.773 1.43684H144.477V24.5632H145.773C146.859 24.5632 147.846 24.3237 148.734 23.8447C149.647 23.3658 150.375 22.6702 150.918 21.7579C151.461 20.8228 151.733 19.6939 151.733 18.3711V7.62895C151.733 6.28333 151.461 5.15439 150.918 4.24211C150.375 3.32983 149.647 2.63421 148.734 2.15526C147.846 1.67632 146.859 1.43684 145.773 1.43684Z"/>
+      <path d="M166.243 26C164.985 26 163.874 25.6351 162.912 24.9053C161.974 24.1754 161.184 23.1947 160.543 21.9632C159.926 20.7088 159.457 19.3061 159.136 17.7553C158.815 16.2044 158.655 14.6193 158.655 13C158.655 11.3807 158.815 9.79561 159.136 8.24474C159.457 6.69386 159.926 5.30263 160.543 4.07105C161.184 2.81667 161.974 1.82456 162.912 1.09474C163.874 0.364912 164.985 0 166.243 0C167.502 0 168.6 0.364912 169.538 1.09474C170.5 1.82456 171.29 2.81667 171.907 4.07105C172.549 5.30263 173.03 6.69386 173.351 8.24474C173.672 9.79561 173.832 11.3807 173.832 13C173.832 14.6193 173.672 16.2044 173.351 17.7553C173.03 19.3061 172.549 20.7088 171.907 21.9632C171.29 23.1947 170.5 24.1754 169.538 24.9053C168.6 25.6351 167.502 26 166.243 26ZM166.243 24.7342C167.699 24.7342 168.81 24.2096 169.575 23.1605C170.34 22.1114 170.723 20.6061 170.723 18.6447V7.35526C170.723 5.39386 170.34 3.8886 169.575 2.83947C168.81 1.79035 167.699 1.26579 166.243 1.26579C164.812 1.26579 163.702 1.79035 162.912 2.83947C162.147 3.8886 161.764 5.39386 161.764 7.35526V18.6447C161.764 20.6061 162.147 22.1114 162.912 23.1605C163.677 24.2096 164.787 24.7342 166.243 24.7342Z"/>
+      <path d="M191.748 26C190.712 26 189.91 25.6807 189.342 25.0421C188.799 24.3807 188.528 23.5254 188.528 22.4763V16.1816C188.528 14.9272 188.269 14.0605 187.75 13.5816C187.257 13.0798 186.257 12.8289 184.752 12.8289H182.975V24.4947H186.048V25.6579H177.275V24.4947H180.384V1.50526H177.275V0.342107H185.788C187.639 0.342107 189.108 0.661405 190.193 1.3C191.304 1.9386 192.094 2.73684 192.563 3.69474C193.056 4.65263 193.303 5.59912 193.303 6.53421C193.303 8.06228 192.797 9.31667 191.785 10.2974C190.773 11.2781 189.428 11.9281 187.75 12.2474L187.565 12.2816V12.4868L187.75 12.5211C188.836 12.7263 189.663 13.0912 190.23 13.6158C190.798 14.1403 191.082 14.9956 191.082 16.1816V22.2026C191.082 22.4307 191.094 22.7272 191.119 23.0921C191.168 23.4342 191.292 23.7421 191.489 24.0158C191.686 24.2667 192.007 24.3921 192.452 24.3921C193.019 24.3921 193.389 24.1868 193.562 23.7763C193.735 23.343 193.821 22.8868 193.821 22.4079V16.4895H194.932V22.5105C194.932 23.0123 194.833 23.5368 194.636 24.0842C194.463 24.6316 194.142 25.0877 193.673 25.4526C193.229 25.8175 192.587 26 191.748 26ZM182.975 11.7342H185.159C186.813 11.7342 188.071 11.4491 188.935 10.8789C189.823 10.286 190.268 9.22544 190.268 7.69737V5.81579C190.268 4.28772 189.823 3.18158 188.935 2.49737C188.071 1.79035 186.813 1.43684 185.159 1.43684H182.975V11.7342Z"/>
+      <path d="M205.63 26C204.371 26 203.26 25.6351 202.298 24.9053C201.36 24.1754 200.571 23.1947 199.929 21.9632C199.312 20.7088 198.843 19.3061 198.522 17.7553C198.201 16.2044 198.041 14.6193 198.041 13C198.041 11.3807 198.201 9.79561 198.522 8.24474C198.843 6.69386 199.312 5.30263 199.929 4.07105C200.571 2.81667 201.36 1.82456 202.298 1.09474C203.26 0.364912 204.371 0 205.63 0C206.617 0 207.443 0.19386 208.11 0.58158C208.801 0.946493 209.344 1.39123 209.738 1.91579C210.133 2.44035 210.392 2.95351 210.516 3.45526H210.812V0.342107H211.997V8.96316H210.072V8.17632C210.072 6.42018 209.85 5.04035 209.405 4.03684C208.986 3.03333 208.431 2.32632 207.74 1.91579C207.073 1.48246 206.37 1.26579 205.63 1.26579C204.198 1.26579 203.088 1.79035 202.298 2.83947C201.533 3.8886 201.151 5.39386 201.151 7.35526V18.6447C201.151 20.6061 201.533 22.1114 202.298 23.1605C203.063 24.2096 204.174 24.7342 205.63 24.7342C206.37 24.7342 207.073 24.5289 207.74 24.1184C208.431 23.6851 208.986 22.9667 209.405 21.9632C209.85 20.9596 210.072 19.5798 210.072 17.8237V17.0368H211.997V25.6579H210.812V22.5447H210.516C210.392 23.0237 210.133 23.5368 209.738 24.0842C209.344 24.6088 208.801 25.0649 208.11 25.4526C207.443 25.8175 206.617 26 205.63 26Z"/>
+      <path d="M216.253 25.6579V24.4947H218.697V1.50526H216.253V0.342107H223.583V1.50526H221.14V11.4263H229.024V1.50526H226.581V0.342107H233.911V1.50526H231.467V24.4947H233.911V25.6579H226.581V24.4947H229.024V12.5211H221.14V24.4947H223.583V25.6579H216.253Z"/>
+      <path d="M244.794 26C242.844 26 241.351 25.4868 240.315 24.4605C239.278 23.4342 238.76 21.9518 238.76 20.0132V1.50526H236.391V0.342107H244.09V1.50526H241.351V20.0474C241.351 21.507 241.696 22.636 242.387 23.4342C243.103 24.2096 244.127 24.5974 245.46 24.5974C246.793 24.5974 247.804 24.2096 248.495 23.4342C249.211 22.636 249.569 21.507 249.569 20.0474V1.50526H247.385V0.342107H253.011V1.50526H250.827V20.0132C250.827 21.9518 250.309 23.4342 249.273 24.4605C248.261 25.4868 246.768 26 244.794 26Z"/>
+      <path d="M255.121 25.6579V24.4947H257.564V1.50526H255.121V0.342107H262.525V1.50526H260.082V13.3421L268.41 1.50526H266.189V0.342107H273.038V1.50526H269.928L263.931 10.0237L271.372 24.4947H274V25.6579H265.708V24.4947H268.633L262.34 12.2816L260.082 15.4974V24.4947H263.635V25.6579H255.121Z"/>
+    </svg>
+</div>
+<script>
+  /* Early cover to avoid flash: intro plays on every load */
+  (function () {
+    window.__playIntro = true;
+    var ov = document.getElementById('transitionOverlay');
+    var lg = document.getElementById('transitionLogo');
+    ov.style.transition = 'none';
+    ov.style.transform = 'translateY(0)';
+    lg.classList.add('show');
+  })();
+</script>
+
+<!-- ══ HEADER ══ -->
+<header>
+  <div class="nav-left">
+    <span class="nav-dot"></span>
+    <a href="#about">About</a>
+  </div>
+  <div class="header-logo">
+    <svg viewBox="0 0 274 26" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0 25.6579V24.4947H1.9619L8.36585 0.342107H9.84653L16.2505 24.4947H18.6196V25.6579H9.88355V24.4947H13.6223L11.4753 16.3868H5.36747L3.2575 24.4947H5.84869V25.6579H0ZM8.40286 4.72105L5.66361 15.2921H11.1791L8.40286 4.72105Z"/>
+      <path d="M34.0927 26L24.6533 5.61053V24.4947H27.7628V25.6579H21.0257V24.4947H23.3948V1.50526H21.0257V0.342107H24.8014L33.7225 19.6368V1.50526H30.6131V0.342107H37.3502V1.50526H34.9811V26H34.0927Z"/>
+      <path d="M53.7117 26L44.2724 5.61053V24.4947H47.3818V25.6579H40.6447V24.4947H43.0138V1.50526H40.6447V0.342107H44.4204L53.3415 19.6368V1.50526H50.2321V0.342107H56.9692V1.50526H54.6001V26H53.7117Z"/>
+      <path d="M58.8571 25.6579V24.4947H60.819L67.2229 0.342107H68.7036L75.1076 24.4947H77.4766V25.6579H68.7406V24.4947H72.4793L70.3324 16.3868H64.2245L62.1146 24.4947H64.7058V25.6579H58.8571ZM67.2599 4.72105L64.5207 15.2921H70.0362L67.2599 4.72105Z"/>
+      <path d="M99.2797 25.6579V24.4947H102.389V1.50526H99.2797V0.342107H114.864V7.66316H113.827L113.309 4.00263C113.087 2.36053 112.063 1.53947 110.237 1.53947H104.98V11.2553H110.2V6.91053H111.31V16.7632H110.2V12.4184H104.98V24.4947H110.977V25.6579H99.2797Z"/>
+      <path d="M118.899 25.6579V24.4947H122.008V1.50526H118.899V0.342107H134.113V7.66316H133.076L132.558 4.00263C132.336 2.36053 131.312 1.53947 129.486 1.53947H124.599V11.2553H129.375V6.91053H130.559V16.7632H129.375V12.4184H124.599V24.4605H129.856C131.657 24.4605 132.669 23.6281 132.891 21.9632L133.446 17.6526H134.483V25.6579H118.899Z"/>
+      <path d="M138.777 25.6579V24.4947H141.886V1.50526H138.777V0.342107H145.773C147.328 0.342107 148.673 0.707019 149.808 1.43684C150.943 2.14386 151.881 3.10175 152.621 4.31053C153.362 5.5193 153.917 6.87632 154.287 8.38158C154.657 9.88684 154.842 11.4263 154.842 13C154.842 14.5737 154.657 16.1132 154.287 17.6184C153.917 19.1237 153.362 20.4807 152.621 21.6895C151.881 22.8982 150.943 23.8675 149.808 24.5974C148.673 25.3044 147.328 25.6579 145.773 25.6579H138.777ZM145.773 1.43684H144.477V24.5632H145.773C146.859 24.5632 147.846 24.3237 148.734 23.8447C149.647 23.3658 150.375 22.6702 150.918 21.7579C151.461 20.8228 151.733 19.6939 151.733 18.3711V7.62895C151.733 6.28333 151.461 5.15439 150.918 4.24211C150.375 3.32983 149.647 2.63421 148.734 2.15526C147.846 1.67632 146.859 1.43684 145.773 1.43684Z"/>
+      <path d="M166.243 26C164.985 26 163.874 25.6351 162.912 24.9053C161.974 24.1754 161.184 23.1947 160.543 21.9632C159.926 20.7088 159.457 19.3061 159.136 17.7553C158.815 16.2044 158.655 14.6193 158.655 13C158.655 11.3807 158.815 9.79561 159.136 8.24474C159.457 6.69386 159.926 5.30263 160.543 4.07105C161.184 2.81667 161.974 1.82456 162.912 1.09474C163.874 0.364912 164.985 0 166.243 0C167.502 0 168.6 0.364912 169.538 1.09474C170.5 1.82456 171.29 2.81667 171.907 4.07105C172.549 5.30263 173.03 6.69386 173.351 8.24474C173.672 9.79561 173.832 11.3807 173.832 13C173.832 14.6193 173.672 16.2044 173.351 17.7553C173.03 19.3061 172.549 20.7088 171.907 21.9632C171.29 23.1947 170.5 24.1754 169.538 24.9053C168.6 25.6351 167.502 26 166.243 26ZM166.243 24.7342C167.699 24.7342 168.81 24.2096 169.575 23.1605C170.34 22.1114 170.723 20.6061 170.723 18.6447V7.35526C170.723 5.39386 170.34 3.8886 169.575 2.83947C168.81 1.79035 167.699 1.26579 166.243 1.26579C164.812 1.26579 163.702 1.79035 162.912 2.83947C162.147 3.8886 161.764 5.39386 161.764 7.35526V18.6447C161.764 20.6061 162.147 22.1114 162.912 23.1605C163.677 24.2096 164.787 24.7342 166.243 24.7342Z"/>
+      <path d="M191.748 26C190.712 26 189.91 25.6807 189.342 25.0421C188.799 24.3807 188.528 23.5254 188.528 22.4763V16.1816C188.528 14.9272 188.269 14.0605 187.75 13.5816C187.257 13.0798 186.257 12.8289 184.752 12.8289H182.975V24.4947H186.048V25.6579H177.275V24.4947H180.384V1.50526H177.275V0.342107H185.788C187.639 0.342107 189.108 0.661405 190.193 1.3C191.304 1.9386 192.094 2.73684 192.563 3.69474C193.056 4.65263 193.303 5.59912 193.303 6.53421C193.303 8.06228 192.797 9.31667 191.785 10.2974C190.773 11.2781 189.428 11.9281 187.75 12.2474L187.565 12.2816V12.4868L187.75 12.5211C188.836 12.7263 189.663 13.0912 190.23 13.6158C190.798 14.1403 191.082 14.9956 191.082 16.1816V22.2026C191.082 22.4307 191.094 22.7272 191.119 23.0921C191.168 23.4342 191.292 23.7421 191.489 24.0158C191.686 24.2667 192.007 24.3921 192.452 24.3921C193.019 24.3921 193.389 24.1868 193.562 23.7763C193.735 23.343 193.821 22.8868 193.821 22.4079V16.4895H194.932V22.5105C194.932 23.0123 194.833 23.5368 194.636 24.0842C194.463 24.6316 194.142 25.0877 193.673 25.4526C193.229 25.8175 192.587 26 191.748 26ZM182.975 11.7342H185.159C186.813 11.7342 188.071 11.4491 188.935 10.8789C189.823 10.286 190.268 9.22544 190.268 7.69737V5.81579C190.268 4.28772 189.823 3.18158 188.935 2.49737C188.071 1.79035 186.813 1.43684 185.159 1.43684H182.975V11.7342Z"/>
+      <path d="M205.63 26C204.371 26 203.26 25.6351 202.298 24.9053C201.36 24.1754 200.571 23.1947 199.929 21.9632C199.312 20.7088 198.843 19.3061 198.522 17.7553C198.201 16.2044 198.041 14.6193 198.041 13C198.041 11.3807 198.201 9.79561 198.522 8.24474C198.843 6.69386 199.312 5.30263 199.929 4.07105C200.571 2.81667 201.36 1.82456 202.298 1.09474C203.26 0.364912 204.371 0 205.63 0C206.617 0 207.443 0.19386 208.11 0.58158C208.801 0.946493 209.344 1.39123 209.738 1.91579C210.133 2.44035 210.392 2.95351 210.516 3.45526H210.812V0.342107H211.997V8.96316H210.072V8.17632C210.072 6.42018 209.85 5.04035 209.405 4.03684C208.986 3.03333 208.431 2.32632 207.74 1.91579C207.073 1.48246 206.37 1.26579 205.63 1.26579C204.198 1.26579 203.088 1.79035 202.298 2.83947C201.533 3.8886 201.151 5.39386 201.151 7.35526V18.6447C201.151 20.6061 201.533 22.1114 202.298 23.1605C203.063 24.2096 204.174 24.7342 205.63 24.7342C206.37 24.7342 207.073 24.5289 207.74 24.1184C208.431 23.6851 208.986 22.9667 209.405 21.9632C209.85 20.9596 210.072 19.5798 210.072 17.8237V17.0368H211.997V25.6579H210.812V22.5447H210.516C210.392 23.0237 210.133 23.5368 209.738 24.0842C209.344 24.6088 208.801 25.0649 208.11 25.4526C207.443 25.8175 206.617 26 205.63 26Z"/>
+      <path d="M216.253 25.6579V24.4947H218.697V1.50526H216.253V0.342107H223.583V1.50526H221.14V11.4263H229.024V1.50526H226.581V0.342107H233.911V1.50526H231.467V24.4947H233.911V25.6579H226.581V24.4947H229.024V12.5211H221.14V24.4947H223.583V25.6579H216.253Z"/>
+      <path d="M244.794 26C242.844 26 241.351 25.4868 240.315 24.4605C239.278 23.4342 238.76 21.9518 238.76 20.0132V1.50526H236.391V0.342107H244.09V1.50526H241.351V20.0474C241.351 21.507 241.696 22.636 242.387 23.4342C243.103 24.2096 244.127 24.5974 245.46 24.5974C246.793 24.5974 247.804 24.2096 248.495 23.4342C249.211 22.636 249.569 21.507 249.569 20.0474V1.50526H247.385V0.342107H253.011V1.50526H250.827V20.0132C250.827 21.9518 250.309 23.4342 249.273 24.4605C248.261 25.4868 246.768 26 244.794 26Z"/>
+      <path d="M255.121 25.6579V24.4947H257.564V1.50526H255.121V0.342107H262.525V1.50526H260.082V13.3421L268.41 1.50526H266.189V0.342107H273.038V1.50526H269.928L263.931 10.0237L271.372 24.4947H274V25.6579H265.708V24.4947H268.633L262.34 12.2816L260.082 15.4974V24.4947H263.635V25.6579H255.121Z"/>
+    </svg>
+  </div>
+  <div class="nav-right">
+    <a href="work.html">Works</a>
+    <span class="nav-dot"></span>
+  </div>
+</header>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <div class="footer-left">
+    <span class="footer-reach">(Reach out)</span>
+    <a href="mailto:anna.fedorchuk89@gmail.com" class="footer-email">anna.fedorchuk89@gmail.com</a>
+  </div>
+  <div class="footer-right">
+    <span class="footer-socials-label">(Socials)</span>
+    <div class="footer-socials">
+      <a href="https://www.instagram.com/anna_fed0rchuk/" target="_blank" rel="noopener">IN</a>
+      <a href="https://www.behance.net/tet9faobe6d" target="_blank" rel="noopener">BE</a>
+      <a href="https://www.linkedin.com/in/anna-fedorchuk/" target="_blank" rel="noopener">LN</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ══ HERO ZONE ══ -->
+<div class="hero-zone">
+  <div class="hero-sticky">
+    <p class="hero-desc">I believe great design is not just beautiful. It solves real problems, builds trust, creates meaningful human experiences, and delivers measurable value.</p>
+    <div class="hero-photos" id="heroPhotos">
+      <div class="hero-photo" data-url="https://www.behance.net/gallery/228882403/Meditation-app">
+        <div class="photo-clip" style="position: relative;">
+          <img class="hero-image-main" src="aura/image cover 2.png" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+          <video class="hero-video-hover" src="aura/hover video 2.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
+        </div>
+        <span class="hero-label">AURA — MEDITATION APP</span>
+      </div>
+      <div class="hero-photo" data-url="https://www.behance.net/gallery/232622849/Gamma-spectrometry-interface">
+        <div class="photo-clip" style="position: relative;">
+          <video class="hero-video-main" src="gamma/cover.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video>
+          <video class="hero-video-hover" src="gamma/videohover.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
+        </div>
+        <span class="hero-label">GAMMALAB — GAMMA SPECTROMETRY INTERFACE</span>
+      </div>
+      <div class="hero-photo" data-url="https://www.behance.net/gallery/226776733/Giving-platform">
+        <div class="photo-clip" style="position: relative;">
+          <img class="hero-image-main" src="faith/cover2.png" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
+          <video class="hero-video-hover" src="faith/Comp 3.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
+        </div>
+        <span class="hero-label">Faith — Giving Platform</span>
+      </div>
+      <div class="hero-photo" data-url="https://efiros.com/">
+        <div class="photo-clip" style="position: relative;">
+          <img class="hero-image-main" src="efiros/cover.png" alt="Efiros">
+          <video class="hero-video-hover" src="efiros/videohoverhero.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
+        </div>
+        <span class="hero-label">Efiros — Engineering</span>
+      </div>
+      <div class="hero-photo" data-url="acecare">
+        <div class="photo-clip"><img class="hero-image-main" src="AceCare/AceCare.png" alt="AceCare" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></div>
+        <span class="hero-label">AceCare — Healthcare App &amp; Branding</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PAGE CONTENT ══ -->
+<main>
+
+  <!-- Intro -->
+  <section class="intro-section" id="about">
+    <div class="intro-inner">
+      <div class="intro-text">
+        <h2 class="h-lg">Creating digital products people understand, trust, and enjoy using.</h2>
+        <div class="body-copy body-copy-narrow">
+          <p>Working with product teams at key moments to clarify direction and turn insight into decisions.</p>
+          <p>From start to finish, my process transforms your ideas into intuitive user experiences that achieve your business goals and set your product apart in the market.</p>
+        </div>
+      </div>
+      <p class="muted">(Choose your purpose)</p>
+      <div class="link-list">
+        <a href="#work"     class="lnk"><span class="dot-d"></span><span class="lnk-label">See case studies</span></a>
+        <a href="#services" class="lnk"><span class="dot-d"></span><span class="lnk-label">Explore services</span></a>
+        <a href="#process"  class="lnk"><span class="dot-d"></span><span class="lnk-label">Discover methodology</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Selected Work -->
+  <section class="work-section" id="work">
+    <p class="work-label">Selected work:</p>
+    <div class="work-grid">
+      <div class="wcard wc1" data-project="gammalab">
+        <p class="wy">/ 2025</p>
+        <div class="wi" style="position: relative;">
+          <video src="gamma/Comp 2.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: 120% center; display: block;"></video>
+        </div>
+        <p class="wt">GAMMALAB — GAMMA SPECTROMETRY INTERFACE</p>
+      </div>
+      <div class="wcard wc2" data-project="aura">
+        <p class="wy">/ 2025</p>
+        <div class="wi" style="position: relative;">
+          <video src="aura/Main Spin 02 (1920) + Global Adjustments.mp4" autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video>
+        </div>
+        <p class="wt">AURA — MEDITATION APP</p>
+      </div>
+      <div class="wcard wc3" data-project="acecare">
+        <p class="wy">/ 2026</p>
+        <div class="wi"><img src="AceCare/Selected work cover.png" alt="AceCare"></div>
+        <p class="wt">AceCare — Healthcare App &amp; Branding</p>
+      </div>
+      <div class="wcard wc4" data-project="efiros">
+        <p class="wy">/ 2026</p>
+        <div class="wi"><video src="efiros/videocover.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video></div>
+        <p class="wt">Efiros — MCP for AI agents in engineering</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section class="services-section" id="services">
+    <div class="services-intro">
+      <div class="services-intro-inner">
+        <h2 class="svc-heading">Digital product design services focused on clarity, usability, and real impact.</h2>
+        <div class="svc-body">
+          <p>I approach each project with curiosity and structure, combining research with strategy to create work that is clear, purposeful, and effective.</p>
+          <p>From MVP to growth, designing products that engage users and deliver measurable results. I believe to create a successful product, it is important to have a clear idea of who we are making it for and what problem it solves.</p>
+        </div>
+      </div>
+      <p class="muted">(Explore my expertise)</p>
+    </div>
+    <div class="svc-list">
+      <!-- Service 01 -->
+      <div class="svc-row" data-service="01">
+        <span class="svc-num">(01)</span>
+        <div class="svc-right"><span class="svc-name">UI/UX Design</span><span class="svc-dot"></span></div>
+      </div>
+      <div class="svc-row-exp" data-service="01">
+        <div class="svc-exp-content">
+          <p class="svc-exp-text">Crafting products that bridge thoughtful design, clear storytelling, and seamless user experiences.</p>
+          <p class="svc-work-label">(Work example)</p>
+          <div class="svc-work-img"><img src="Images/Product Design.png" alt="UI/UX Design" width="276" height="207"></div>
+        </div>
+      </div>
+
+      <!-- Service 02 -->
+      <div class="svc-row" data-service="02">
+        <span class="svc-num">(02)</span>
+        <div class="svc-right"><span class="svc-name">Web Design</span><span class="svc-dot"></span></div>
+      </div>
+      <div class="svc-row-exp" data-service="02">
+        <div class="svc-exp-content">
+          <p class="svc-exp-text">Designed to do more than look good. Built to perform, adapt, and grow in how it functions and how it feels.</p>
+          <p class="svc-work-label">(Work example)</p>
+          <div class="svc-work-img"><img src="Images/web design png.png" alt="Web Design" width="480" height="360"></div>
+        </div>
+      </div>
+
+      <!-- Service 03 -->
+      <div class="svc-row" data-service="03">
+        <span class="svc-num">(03)</span>
+        <div class="svc-right"><span class="svc-name">Mobile App Design</span><span class="svc-dot"></span></div>
+      </div>
+      <div class="svc-row-exp" data-service="03">
+        <div class="svc-exp-content">
+          <p class="svc-exp-text">From dark mode and adaptive layouts to micro-interactions, creating engaging visuals that feel native on every device, balancing function with a sleek look.</p>
+          <p class="svc-work-label">(Work example)</p>
+          <div class="svc-work-img"><img src="Images/Mobile design.png" alt="Mobile App Design"></div>
+        </div>
+      </div>
+
+      <!-- Service 04 -->
+      <div class="svc-row" data-service="04">
+        <span class="svc-num">(04)</span>
+        <div class="svc-right"><span class="svc-name">Design Systems</span><span class="svc-dot"></span></div>
+      </div>
+      <div class="svc-row-exp" data-service="04">
+        <div class="svc-exp-content">
+          <p class="svc-exp-text">Scalable design systems built to create consistency, streamline workflows, and support product growth across every touchpoint.</p>
+          <p class="svc-work-label">(Work example)</p>
+          <div class="svc-work-img"><img src="Images/Design Systems.png" alt="Design Systems" width="480" height="360"></div>
+        </div>
+      </div>
+
+      <!-- Service 05 -->
+      <div class="svc-row" data-service="05">
+        <span class="svc-num">(05)</span>
+        <div class="svc-right"><span class="svc-name">Marketing Design</span><span class="svc-dot"></span></div>
+      </div>
+      <div class="svc-row-exp" data-service="05">
+        <div class="svc-exp-content">
+          <p class="svc-exp-text">Creative assets that connect brands with their audience.</p>
+          <p class="svc-work-label">(Work example)</p>
+          <div class="svc-work-img"><img src="Images/Marketing Design.png" alt="Marketing Design" width="480" height="360"></div>
+        </div>
+      </div>
+
+      <!-- Service 06 -->
+    </div>
+  </section>
+
+  <!-- Quote -->
+  <section class="quote-section">
+    <div class="quote-sticky">
+      <!-- set 1 (left) -->
+      <div class="qp set1 qp1"><img src="Images/small1.png" alt=""></div>
+      <div class="qp set1 qp2"><img src="Images/image 2039884128.png" alt=""></div>
+      <div class="qp set1 qp3"><img src="Images/image 2039884129.png" alt=""></div>
+      <div class="qp set1 qp4"><img src="Images/bigimg.png" alt=""></div>
+      <!-- set 2 (right) -->
+      <div class="qp set2 qp5"><img src="Images/quote2/small1.png" alt=""></div>
+      <div class="qp set2 qp6"><img src="Images/quote2/small2.png" alt=""></div>
+      <div class="qp set2 qp7"><img src="Images/quote2/small3.png" alt=""></div>
+      <div class="qp set2 qp8"><img src="Images/quote2/big image.png" alt=""></div>
+      <!-- quote 1 -->
+      <div class="quote-block q1" id="quoteBlock1">
+        <p class="qt">"A designer knows he has achieved perfection not when there is nothing left to add, but when there is nothing left to take away."</p>
+        <p class="qa">QT ( Antoine de Saint-Exupéry)</p>
+      </div>
+      <!-- set 3 (right) -->
+      <div class="qp set3 qp9"><img src="Images/quote 3/small1.png" alt=""></div>
+      <div class="qp set3 qp10"><img src="Images/quote 3/small2.png" alt=""></div>
+      <div class="qp set3 qp11"><img src="Images/quote 3/small3.png" alt=""></div>
+      <div class="qp set3 qp12"><img src="Images/quote 3/big image.png" alt=""></div>
+      <!-- quote 2 -->
+      <div class="quote-block q2" id="quoteBlock2">
+        <p class="qt">"Good design is obvious. Great design is transparent."</p>
+        <p class="qa">QT ( Joe Sparano )</p>
+      </div>
+      <!-- quote 3 -->
+      <div class="quote-block q3" id="quoteBlock3">
+        <p class="qt">"Design is not art. Design is solving problems."</p>
+        <p class="qa">QT ( Otl Aicher )</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Process -->
+  <section class="process-section" id="process">
+    <div class="process-intro">
+      <div class="process-intro-inner">
+        <h2 class="proc-heading">The difference between design that looks good and design that works is the thinking behind it.</h2>
+        <div class="proc-body">
+          <p>I believe that true design isn't just about aesthetics, it's about strategy and purpose. Beautiful pixels mean nothing if they don't solve real problems, guide user behavior, and drive business growth.</p>
+          <p>That's why I don't just create visuals, I build intentional digital experiences where every layout, interaction, and detail is calculated to deliver real, measurable results.</p>
+          <p>My workflow follows the Double Diamond methodology, ensuring every design decision is backed by industry-standard research and logic, rather than personal taste.</p>
+        </div>
+      </div>
+      <p class="muted">(My process)</p>
+    </div>
+    <div class="process-cards">
+      <div class="pcard">
+        <div class="picon"><svg width="148" height="132" viewBox="0 0 148 132" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M88 70L79.5554 61.5554M79.5554 61.5554C80.9999 60.1109 82.1457 58.396 82.9274 56.5087C83.7092 54.6214 84.1116 52.5986 84.1116 50.5558C84.1116 48.513 83.7092 46.4902 82.9274 44.6028C82.1457 42.7155 80.9999 41.0007 79.5554 39.5562C78.1109 38.1117 76.396 36.9659 74.5087 36.1841C72.6214 35.4024 70.5986 35 68.5558 35C66.513 35 64.4902 35.4024 62.6028 36.1841C60.7155 36.9659 59.0007 38.1117 57.5562 39.5562C54.6389 42.4735 53 46.4301 53 50.5558C53 54.6814 54.6389 58.6381 57.5562 61.5554C60.4735 64.4726 64.4301 66.1116 68.5558 66.1116C72.6814 66.1116 76.6381 64.4726 79.5554 61.5554Z" stroke="#0D0D0D" stroke-width="0.3" stroke-linecap="round" stroke-linejoin="round"/>
+          <path class="animated-path" d="M140 67.5L137.507 77.834L135.36 83.239C133.958 86.769 132.257 90.2057 130.304 93.4634C128.368 96.6925 126.136 99.8093 123.704 102.683C121.294 105.53 118.612 108.222 115.773 110.641C112.958 113.041 109.903 115.241 106.735 117.151C103.594 119.046 100.255 120.704 96.8476 122.062C93.4715 123.408 89.9411 124.491 86.391 125.269C82.8695 126.041 79.2418 126.53 75.6416 126.719C72.072 126.905 68.447 126.798 64.8947 126.4C61.3718 126.005 57.8483 125.316 54.4368 124.352C51.0469 123.395 47.7103 122.15 44.5218 120.653C41.3638 119.17 38.3023 117.415 35.4272 115.438C32.5757 113.479 29.8615 111.268 27.3659 108.871C24.8868 106.49 22.5847 103.888 20.5246 101.136C18.4857 98.4135 16.6509 95.4962 15.0786 92.4796C13.521 89.491 12.1913 86.3407 11.1368 83.1397C10.0908 79.9645 9.29432 76.6686 8.77498 73.3661C8.26135 70.0999 8.00991 66.7476 8.0293 63.4414C8.04846 60.1729 8.33765 56.8519 8.88339 53.6292C9.42355 50.4394 10.2367 47.2398 11.2851 44.1792C12.322 41.1523 13.6274 38.1591 15.1403 35.3398C16.6357 32.5531 18.3903 29.8393 20.3173 27.3315C22.219 24.8567 24.3641 22.4915 26.6419 20.3577C28.8947 18.2473 31.369 16.2827 33.9352 14.5668C36.4685 12.8729 39.1906 11.3587 41.9662 10.1002C44.7147 8.85393 47.616 7.81591 50.5312 7.03559C53.4029 6.26691 56.3903 5.72447 59.349 5.43451C62.2806 5.14721 65.2846 5.10047 68.2237 5.2971C71.1253 5.49121 74.0527 5.93024 76.8834 6.5961C79.6862 7.25538 82.4726 8.15767 85.1298 9.26654C87.7511 10.3604 90.3189 11.6884 92.7268 13.195C95.109 14.6855 97.4011 16.3955 99.5082 18.2546C101.589 20.09 103.546 22.1241 105.3 24.2735C107.033 26.3981 108.617 28.6999 109.983 31.0781C111.328 33.4213 112.501 35.9157 113.449 38.446C114.385 40.9475 115.13 43.571 115.648 46.1913C116.158 48.769 116.463 51.4399 116.549 54.066C116.634 56.6568 116.504 59.3127 116.167 61.8829C115.836 64.4104 115.286 66.9711 114.55 69.4114C113.824 71.8159 112.878 74.2204 111.771 76.4749C110.684 78.6899 109.382 80.8713 107.948 82.8798C106.538 84.8563 104.921 86.7678 103.207 88.4877C101.524 90.1767 99.6499 91.7707 97.7129 93.1617C95.8075 94.53 93.7336 95.7744 91.6296 96.8116C89.5624 97.8306 87.3531 98.7015 85.1465 99.367C82.9782 100.021 80.6953 100.508 78.4489 100.796C76.2438 101.079 73.9571 101.182 71.7355 101.098C69.5475 101.015 67.3141 100.744 65.1698 100.301C63.0679 99.8668 60.9511 99.2431 58.9493 98.4687C56.9826 97.7079 55.0311 96.7608 53.2165 95.6863C51.4341 94.6309 49.6977 93.3982 48.1134 92.0637C46.5595 90.7547 45.0773 89.2804 43.7597 87.7338C42.469 86.2187 41.2873 84.5783 40.2627 82.872L40.231 82.8191C39.227 81.1469 38.3627 79.3948 37.6469 77.5804C36.9307 75.7651 36.3656 73.8937 35.9574 71.9854L35.3701 69.2398" stroke="#0D0D0D" stroke-width="0.3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4.57 4.57"/>
+          <style>.animated-path { animation: discoverDash 6s linear infinite; } @keyframes discoverDash { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -200; } }</style>
+        </svg></div>
+        <div class="pcontent">
+          <span class="dot-d"></span>
+          <p class="ptitle">Discover</p>
+          <p class="pdesc">User research, competitor analysis, stakeholder interviews, and data analysis to understand the problem.</p>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="picon"><svg width="184" height="132" viewBox="0 0 184 132" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <style>.orbit{transform-origin:92px 65px;animation:rotate 12s linear infinite}.def-line{stroke-dasharray:4.57 4.57;animation:dashMove 1.5s linear infinite}@keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}@keyframes dashMove{from{stroke-dashoffset:0}to{stroke-dashoffset:-18}}</style>
+          <circle cx="92" cy="65" r="16" stroke="#0D0D0D" stroke-width="0.3"/>
+          <g class="orbit">
+            <circle cx="92" cy="12" r="9" stroke="#0D0D0D" stroke-width="0.3"/>
+            <line class="def-line" x1="92.15" y1="29.1148" x2="92.15" y2="44.9223" stroke="#0D0D0D" stroke-width="0.3"/>
+            <circle cx="92" cy="118" r="9" stroke="#0D0D0D" stroke-width="0.3"/>
+            <line class="def-line" x1="92.15" y1="86.2242" x2="92.15" y2="100.567" stroke="#0D0D0D" stroke-width="0.3"/>
+            <circle cx="139" cy="43" r="9" stroke="#0D0D0D" stroke-width="0.3"/>
+            <line class="def-line" x1="0.15" y1="-0.15" x2="14.8253" y2="-0.15" transform="matrix(0.865731 -0.500509 -0.499491 -0.866319 111.469 58.4961)" stroke="#0D0D0D" stroke-width="0.3"/>
+            <circle cx="139" cy="93" r="9" stroke="#0D0D0D" stroke-width="0.3"/>
+            <line class="def-line" x1="0.15" y1="-0.15" x2="14.8253" y2="-0.15" transform="matrix(0.865731 0.500509 -0.499491 0.866319 111.469 76)" stroke="#0D0D0D" stroke-width="0.3"/>
+            <circle cx="45" cy="41" r="9" stroke="#0D0D0D" stroke-width="0.3"/>
+            <line class="def-line" x1="0.15" y1="-0.15" x2="14.8253" y2="-0.15" transform="matrix(-0.865731 -0.500509 0.499491 -0.866319 71.7148 58.4961)" stroke="#0D0D0D" stroke-width="0.3"/>
+            <circle cx="46" cy="92" r="9" stroke="#0D0D0D" stroke-width="0.3"/>
+            <line class="def-line" x1="0.15" y1="-0.15" x2="14.8253" y2="-0.15" transform="matrix(-0.865731 0.500509 0.499491 0.866319 72.3594 76)" stroke="#0D0D0D" stroke-width="0.3"/>
+          </g>
+        </svg></div>
+        <div class="pcontent">
+          <span class="dot-d"></span>
+          <p class="ptitle">Define</p>
+          <p class="pdesc">User journeys, experience maps, to translate insights into a clear design direction.</p>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="picon"><svg width="148" height="132" viewBox="0 0 148 132" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <style>.orbit-group{transform-origin:74px 66px;animation:rotateGroup 6s linear infinite}.circle-top,.circle-left,.circle-right{animation:morph 3s ease-in-out infinite;transform-box:fill-box;transform-origin:center}.outer-ring{transform-origin:center;transform-box:fill-box;animation:ringRotate 10s linear infinite,ringPulse 4s ease-in-out infinite}@keyframes rotateGroup{0%,55%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes morph{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.8;transform:scale(1.04)}}@keyframes ringRotate{from{stroke-dashoffset:0}to{stroke-dashoffset:-120}}@keyframes ringPulse{0%,100%{opacity:0.5}50%{opacity:1}}</style>
+          <circle class="outer-ring" cx="73.5" cy="66.5" r="60.5" stroke="#0D0D0D" stroke-width="0.3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="4.57 4.57"/>
+          <g class="orbit-group">
+            <path class="circle-top" d="M88 58C88 65.732 81.732 72 74 72C66.268 72 60 65.732 60 58C60 50.268 66.268 44 74 44C81.732 44 88 50.268 88 58Z" stroke="#0D0D0D" stroke-width="0.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path class="circle-left" d="M80 74C80 81.732 73.732 88 66 88C58.268 88 52 81.732 52 74C52 66.268 58.268 60 66 60C73.732 60 80 66.268 80 74Z" stroke="#0D0D0D" stroke-width="0.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            <path class="circle-right" d="M96 74C96 81.732 89.732 88 82 88C74.268 88 68 81.732 68 74C68 66.268 74.268 60 82 60C89.732 60 96 66.268 96 74Z" stroke="#0D0D0D" stroke-width="0.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </g>
+        </svg></div>
+        <div class="pcontent">
+          <span class="dot-d"></span>
+          <p class="ptitle">Design</p>
+          <p class="pdesc">Wireframes, prototypes, and high-fidelity UI — with scalable design systems built from the ground up.</p>
+        </div>
+      </div>
+      <div class="pcard">
+        <div class="picon"><svg width="138" height="132" viewBox="0 0 138 132" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <style>.big-ring{stroke-dasharray:400;stroke-dashoffset:400;animation:drawBig 5s ease infinite}.mid-ring{stroke-dasharray:250;stroke-dashoffset:250;animation:drawMid 5s ease infinite}.center-del{transform-origin:center;transform-box:fill-box;opacity:0;animation:popCenter 5s ease infinite}.dots{stroke-dasharray:2 6;stroke-dashoffset:20;opacity:0;animation:showDots 5s linear infinite}.arrow{opacity:0;animation:showArrow 5s ease infinite}@keyframes drawBig{0%{stroke-dashoffset:400;opacity:0}20%{opacity:1}35%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:1}}@keyframes drawMid{0%,25%{stroke-dashoffset:250;opacity:0}50%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:1}}@keyframes popCenter{0%,45%{opacity:0;transform:scale(0)}60%{opacity:1;transform:scale(1.2)}75%{transform:scale(1)}100%{opacity:1;transform:scale(1)}}@keyframes showDots{0%,65%{opacity:0;stroke-dashoffset:20}100%{opacity:1;stroke-dashoffset:0}}@keyframes showArrow{0%,75%{opacity:0;transform:translateX(-6px)}100%{opacity:1;transform:translateX(0px)}}</style>
+          <path class="big-ring" d="M124.285 50.4111C117.379 24.2735 93.5207 5 65.1498 5C31.3777 5 4 32.3106 4 66C4 99.6894 31.3777 127 65.1498 127C93.2749 127 116.965 108.059 124.101 82.2667" stroke="#0D0D0D" stroke-width="0.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <path class="mid-ring" d="M95.3222 50.4111C89.6659 39.5388 78.2774 32.1111 65.1498 32.1111C46.3875 32.1111 31.1777 47.2837 31.1777 66C31.1777 84.7163 46.3875 99.8889 65.1498 99.8889C78.0028 99.8889 89.1886 92.7687 94.9598 82.2667" stroke="#0D0D0D" stroke-width="0.3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle class="center-del" cx="65.1498" cy="66" r="9.3" stroke="#0D0D0D" stroke-width="0.3" fill="none"/>
+          <path class="dots" d="M74.5 66H76.6704M80.0377 66H84.9434M88.6226 66H92.3019M95.9811 66H99.6604M102.113 66H105.792M109.472 66H113.151" stroke="#0D0D0D" stroke-width="0.8" stroke-linecap="round"/>
+          <path class="arrow" d="M116.217 66L134 66M123.129 55.1556L134 66L123.129 76.8444" stroke="#0D0D0D" stroke-width="0.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg></div>
+        <div class="pcontent">
+          <span class="dot-d"></span>
+          <p class="ptitle">Deliver</p>
+          <p class="pdesc">Developer collaboration, usability testing, iteration, and polished handoff documentation.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Project Showcase Slider -->
+  <section class="showcase-section" id="showcase">
+    <!-- Left: Title -->
+    <div class="showcase-left">
+      <p class="sc-label">(Project)</p>
+      <p class="sc-title" id="scTitle">GAMMALAB — GAMMA SPECTROMETRY INTERFACE</p>
+    </div>
+    <!-- Center: Featured Video -->
+    <video class="sc-featured-img" id="scFeaturedImg" autoplay muted loop playsinline></video>
+    <img class="sc-featured-img" id="scFeaturedPic" alt="" style="display:none;">
+    <!-- Right: Counter -->
+    <div class="showcase-right">
+      <p class="sc-counter" id="scCounter">(1/5)</p>
+    </div>
+  </section>
+
+  <!-- Directional cursor for showcase (hidden by default) -->
+  <div class="sc-cursor-el" id="scCursor">
+    <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- circle ring -->
+      <circle cx="26" cy="26" r="22" stroke="#fff" stroke-width="0.8"/>
+      <!-- center dot -->
+      <circle cx="26" cy="26" r="2.5" fill="#fff"/>
+      <!-- left arrow -->
+      <path d="M18 26H10M14 22L10 26L14 30" stroke="#fff" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- right arrow -->
+      <path d="M34 26H42M38 22L42 26L38 30" stroke="#fff" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
+  <div class="footer-spacer"></div>
+</main>
+
+<script>
+  /* ── Custom cursor ── */
+  const cursorDot  = document.getElementById('cursorDot');
+  const cursorRing = document.getElementById('cursorRing');
+
+  let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+  let dx = mx, dy = my;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX;
+    my = e.clientY;
+  });
+
+  (function animateDot() {
+    dx += (mx - dx) * 0.05;
+    dy += (my - dy) * 0.05;
+    cursorDot.style.left = dx + 'px';
+    cursorDot.style.top  = dy + 'px';
+    requestAnimationFrame(animateDot);
+  })();
+
+
+  /* Add hover effect to clickables */
+  const allClickables = document.querySelectorAll('a, button, .svc-row, .svc-work-img img, .showcase-left, .header-logo');
+  allClickables.forEach(el => {
+    el.addEventListener('mouseenter', () => cursorDot.classList.add('cursor-hover'));
+    el.addEventListener('mouseleave', () => cursorDot.classList.remove('cursor-hover'));
+  });
+
+  /* ── Logo click → scroll to top ── */
+  const headerLogoEl = document.querySelector('.header-logo');
+  if (headerLogoEl) {
+    headerLogoEl.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
+  /* ── Page transition (shared) ── */
+  (function pageTransition() {
+    const overlay = document.getElementById('transitionOverlay');
+    const tlogo = document.getElementById('transitionLogo');
+    const headerLogo = document.querySelector('.header-logo');
+
+    function instant(fn) {
+      overlay.style.transition = 'none';
+      tlogo.style.transition = 'none';
+      fn();
+      overlay.offsetHeight; // force reflow
+      overlay.style.transition = '';
+      tlogo.style.transition = '';
+    }
+
+    // ARRIVE: play intro on every load
+    sessionStorage.removeItem('pageIntro');
+    if (window.__playIntro) {
+      if (headerLogo) headerLogo.classList.add('logo-hidden');
+      instant(() => {
+        overlay.style.transform = 'translateY(0)';   // covered
+        tlogo.classList.add('show');                 // logo centered, visible
+      });
+      // hold, then reveal upward + dock logo to header
+      setTimeout(() => {
+        overlay.style.transform = 'translateY(-100%)';
+        tlogo.classList.add('docked');
+        setTimeout(() => {
+          if (headerLogo) headerLogo.classList.remove('logo-hidden');
+          // reset to ready state (reusable for leaving)
+          instant(() => {
+            overlay.style.transform = 'translateY(100%)';
+            tlogo.classList.remove('show', 'docked');
+          });
+        }, 1350);
+      }, 1500);
+    }
+
+    // LEAVE: trigger transition then navigate
+    window.leaveTo = function (url) {
+      tlogo.classList.add('show');                   // logo appears centered
+      overlay.style.transform = 'translateY(0)';     // rise from bottom to cover
+      sessionStorage.setItem('pageIntro', '1');
+      setTimeout(() => { window.location.href = url; }, 820);
+    };
+
+    document.querySelectorAll('a[href="work.html"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.leaveTo('work.html');
+      });
+    });
+  })();
+
+  /* ── Hero scroll animation ── */
+  const photosWrap = document.getElementById('heroPhotos');
+  const photoItems = photosWrap.querySelectorAll('.hero-photo');
+  const descEl     = document.querySelector('.hero-desc');
+
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function easeInOut(t)  { return t < 0.5 ? 2*t*t : -1 + (4 - 2*t)*t; }
+
+  // Scatter targets — top group (photos 2,4) and bottom group (photos 1,3,5)
+  // ar = height/width aspect ratio used to keep proportions at all screen sizes
+  const scatterBase = [
+    { lf:  21/1440, top: 420, wf: 180/1440, ar: 4/3  },  // woman  — 3:4  left-bottom
+    { lf: 302/1440, top:  10, wf: 276/1440, ar: 9/16 },  // Studio — 16:9 upper
+    { lf: 583/1440, top: 430, wf: 276/1440, ar: 9/16 },  // phone  — 16:9 center-bottom
+    { lf: 912/1440, top:   0, wf: 180/1440, ar: 4/3  },  // robot  — 3:4  upper-right
+    { lf:1194/1440, top: 385, wf: 180/1440, ar: 4/3  },  // Melina — 3:4  right-bottom
+  ];
+
+  let introPlaying = true;
+
+  function updateHero() {
+    if (introPlaying) return;
+    const vh  = window.innerHeight;
+    const vw  = window.innerWidth;
+    const sy  = window.scrollY;
+
+    const gap = 8, margin = 20;
+    const photoW = (vw - margin * 2 - gap * 4) / 5;
+    const rowH   = photoW * (315 / 273.6);
+    const rowTop = Math.round(vh * 0.32);
+
+    // Cap scatter layout to the 1440px design size; centre on wider screens
+    const effVw    = Math.min(vw, 1440);
+    const scOffset = (vw - effVw) / 2;
+    const scWs = scatterBase.map(sc => effVw * sc.wf);
+    const scHs = scatterBase.map((sc, i) => scWs[i] * sc.ar);
+    const scLs = scatterBase.map(sc => scOffset + sc.lf * effVw);
+
+    // Centre scatter group vertically in viewport
+    const scTopMin = Math.min(...scatterBase.map(s => s.top));
+    const scBotMax = Math.max(...scatterBase.map((s, i) => s.top + scHs[i]));
+    const vOffset  = Math.max(90, Math.round((vh - (scBotMax - scTopMin)) / 2));
+
+    // Compact row → scatter  (scrollY 0 → 1 viewport)
+    const raw = Math.min(Math.max(sy / vh, 0), 1);
+    const t   = easeInOut(raw);
+
+    // Subtle downward drift as scroll begins
+    const drift = raw * 40;
+
+    photoItems.forEach((p, i) => {
+      const rowLeft = margin + i * (photoW + gap);
+      const sc      = scatterBase[i];
+
+      p.style.left   = lerp(rowLeft,        scLs[i],          t) + 'px';
+      p.style.top    = lerp(rowTop + drift, sc.top + vOffset, t) + 'px';
+      p.style.width  = lerp(photoW,         scWs[i],          t) + 'px';
+      p.style.height = lerp(rowH,           scHs[i],          t) + 'px';
+    });
+
+    // Description fades out as scatter begins
+    descEl.style.opacity = Math.max(1 - raw * 5, 0);
+  }
+
+  window.addEventListener('scroll', updateHero, { passive: true });
+  window.addEventListener('resize', updateHero);
+
+  /* ── Hero intro: photos start gathered in the center, then spread into the row ── */
+  function heroRowMetrics() {
+    const vw = window.innerWidth;
+    const gap = 8, margin = 20;
+    const photoW = (vw - margin * 2 - gap * 4) / 5;
+    const rowH = photoW * (315 / 273.6);
+    const rowTop = Math.round(window.innerHeight * 0.32);
+    return { vw, gap, margin, photoW, rowH, rowTop };
+  }
+
+  // place all photos stacked in the center immediately (no flash)
+  (function placeCenter() {
+    const m = heroRowMetrics();
+    const centerX = m.vw / 2 - m.photoW / 2;
+    photoItems.forEach(p => {
+      p.style.left = centerX + 'px';
+      p.style.top = m.rowTop + 'px';
+      p.style.width = m.photoW + 'px';
+      p.style.height = m.rowH + 'px';
+    });
+  })();
+
+  const INTRO_MS = 1200;
+  let introStart = null;
+  function heroIntro(ts) {
+    if (introStart === null) introStart = ts;
+    const p = Math.min((ts - introStart) / INTRO_MS, 1);
+    const e = easeInOut(p);
+    const m = heroRowMetrics();
+    const centerX = m.vw / 2 - m.photoW / 2;
+    photoItems.forEach((ph, i) => {
+      const rowLeft = m.margin + i * (m.photoW + m.gap);
+      ph.style.left = lerp(centerX, rowLeft, e) + 'px';
+      ph.style.top = m.rowTop + 'px';
+      ph.style.width = m.photoW + 'px';
+      ph.style.height = m.rowH + 'px';
+    });
+    if (p < 1) {
+      requestAnimationFrame(heroIntro);
+    } else {
+      introPlaying = false;
+      updateHero();
+    }
+  }
+  // start after the page-transition overlay reveals the page
+  setTimeout(() => requestAnimationFrame(heroIntro), 1650);
+
+  /* ── Hero Photos Click Handler ── */
+  const heroPhotos = document.querySelectorAll('.hero-photo[data-url]');
+  const heroCursor = document.getElementById('heroCursor');
+
+  const PHOTO_KEY = {
+    'https://www.behance.net/gallery/228882403/Meditation-app': 'aura',
+    'https://www.behance.net/gallery/232622849/Gamma-spectrometry-interface': 'gammalab',
+    'https://www.behance.net/gallery/226776733/Giving-platform': 'faith',
+    'https://efiros.com/': 'efiros',
+    'acecare': 'acecare',
+  };
+  heroPhotos.forEach(photo => {
+    photo.addEventListener('click', () => {
+      const key = PHOTO_KEY[photo.getAttribute('data-url')];
+      if (key && window.openProject) window.openProject(key);
+    });
+
+    photo.addEventListener('mouseenter', () => {
+      heroCursor.classList.add('visible');
+      cursorDot.style.opacity = '0';
+      cursorRing.style.opacity = '0';
+    });
+
+    photo.addEventListener('mouseleave', () => {
+      heroCursor.classList.remove('visible');
+      cursorDot.style.opacity = '1';
+      cursorRing.style.opacity = '1';
+    });
+
+    photo.addEventListener('mousemove', (e) => {
+      heroCursor.style.left = e.clientX + 'px';
+      heroCursor.style.top = e.clientY + 'px';
+    });
+  });
+
+  /* ── Quote section: pinned, three-phase scroll animation ── */
+  const quoteSection = document.querySelector('.quote-section');
+  const qSet1 = document.querySelectorAll('.qp.set1');
+  const qSet2 = document.querySelectorAll('.qp.set2');
+  const qSet3 = document.querySelectorAll('.qp.set3');
+  const qBlock1 = document.getElementById('quoteBlock1');
+  const qBlock2 = document.getElementById('quoteBlock2');
+  const qBlock3 = document.getElementById('quoteBlock3');
+
+  function qClamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  function updateQuote() {
+    const rect = quoteSection.getBoundingClientRect();
+    const total = quoteSection.offsetHeight - window.innerHeight;
+    const p = total > 0 ? qClamp(-rect.top / total, 0, 1) : 0;
+
+    const A = 1 / 3, B = 2 / 3;
+    const p1 = qClamp(p / A, 0, 1);              // phase 1 progress
+    const p2 = qClamp((p - A) / A, 0, 1);        // phase 2 progress
+    const p3 = qClamp((p - B) / A, 0, 1);        // phase 3 progress
+
+    // set 1: drift left + fade out by end of phase 1
+    qSet1.forEach((el) => {
+      const x = -p1 * 1100;
+      const op = 1 - qClamp((p1 - 0.75) / 0.25, 0, 1);
+      el.style.transform = `translateX(${x}px)`;
+      el.style.opacity = op;
+    });
+
+    // set 2: enter from right; small ones align to the logo's vertical line; fade out at end
+    const ease = 1 - Math.pow(1 - p2, 3);
+    const logoLine = window.innerWidth / 2 - 137; // logo left edge (logo is 274px, centered)
+    qSet2.forEach((el) => {
+      const op = qClamp(p2 / 0.2, 0, 1) * (1 - qClamp((p2 - 0.8) / 0.2, 0, 1));
+      let x;
+      if (el.classList.contains('qp8')) {
+        x = 700 - p2 * 2000;            // big image drifts further left
+      } else {
+        const alignX = logoLine - el.offsetLeft;  // align left edge to logo line
+        const startX = window.innerWidth * 0.5;   // start off to the right
+        x = startX + (alignX - startX) * ease;
+      }
+      el.style.transform = `translateX(${x}px)`;
+      el.style.opacity = op;
+    });
+
+    // set 3: enter from right (phase 3), drift further left, fade in
+    qSet3.forEach((el) => {
+      const x = 800 - p3 * 1900;
+      const op = qClamp(p3 / 0.2, 0, 1);
+      el.style.transform = `translateX(${x}px)`;
+      el.style.opacity = op;
+    });
+
+    // quotes cross-fade across the three phases
+    qBlock1.style.opacity = 1 - qClamp((p - 0.26) / 0.07, 0, 1);
+    qBlock2.style.opacity = qClamp((p - 0.33) / 0.07, 0, 1) * (1 - qClamp((p - 0.60) / 0.06, 0, 1));
+    qBlock3.style.opacity = qClamp((p - 0.66) / 0.07, 0, 1);
+  }
+
+  window.addEventListener('scroll', updateQuote, { passive: true });
+  window.addEventListener('resize', updateQuote);
+  updateQuote();
+
+  /* ── Project Showcase Slider ── */
+  const showcase = (() => {
+    const projects = [
+      { title: 'AURA — MEDITATION APP', video: 'aura/hover video 2.mp4', key: 'aura', startTime: 0 },
+      { title: 'GAMMALAB — GAMMA SPECTROMETRY INTERFACE', video: 'gamma/videohover.mp4', key: 'gammalab', startTime: 0 },
+      { title: 'FAITH — GIVING PLATFORM', video: 'faith/videopromo.mp4', key: 'faith', startTime: 0 },
+      { title: 'EFIROS — MCP FOR AI AGENTS IN ENGINEERING', video: 'efiros/videohoverhero.mp4', key: 'efiros', startTime: 5 },
+      { title: 'ACECARE — HEALTHCARE APP & BRANDING', video: 'AceCare/AceCare.png', key: 'acecare', startTime: 0 },
+    ];
+    let current = 0;
+    const img = document.getElementById('scFeaturedImg');
+    const pic = document.getElementById('scFeaturedPic');
+    const ttl = document.getElementById('scTitle');
+    const ctr = document.getElementById('scCounter');
+    const cursor = document.getElementById('scCursor');
+
+    const isImg = (src) => /\.(png|jpe?g|webp|gif|svg)$/i.test(src);
+
+    function selectSlide(idx) {
+      const prev = pic.style.display !== 'none' ? pic : img;
+      prev.classList.add('fade-out');
+      setTimeout(() => {
+        current = idx;
+        const media = projects[current].video;
+        const useImg = isImg(media);
+        const next = useImg ? pic : img;
+        const other = useImg ? img : pic;
+        other.style.display = 'none';
+        if (other.tagName === 'VIDEO') { try { other.pause(); } catch (e) {} }
+        next.classList.add('fade-out');
+        next.style.display = 'block';
+        next.src = media;
+        if (!useImg) {
+          const startTime = projects[current].startTime || 0;
+          img.addEventListener('loadeddata', function setStart() {
+            img.currentTime = startTime;
+            img.removeEventListener('loadeddata', setStart);
+          });
+        }
+        ttl.textContent = projects[current].title;
+        ctr.textContent = `(${current + 1}/${projects.length})`;
+        requestAnimationFrame(() => requestAnimationFrame(() => next.classList.remove('fade-out')));
+      }, 200);
+    }
+
+    function nextSlide() {
+      selectSlide((current + 1) % projects.length);
+    }
+
+    function prevSlide() {
+      selectSlide((current - 1 + projects.length) % projects.length);
+    }
+
+    [img, pic].forEach((el) => {
+      el.addEventListener('click', nextSlide);
+      el.addEventListener('mouseenter', () => {
+        cursor.classList.add('sc-cur-visible');
+        cursorDot.style.opacity = '0';
+        cursorRing.style.opacity = '0';
+      });
+      el.addEventListener('mouseleave', () => {
+        cursor.classList.remove('sc-cur-visible');
+        cursorDot.style.opacity = '1';
+        cursorRing.style.opacity = '1';
+      });
+      el.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+    });
+
+    // Click on showcase-left to open project URL
+    const showcaseLeft = document.querySelector('.showcase-left');
+    showcaseLeft.addEventListener('click', () => {
+      const key = projects[current].key;
+      if (key && window.openProject) window.openProject(key);
+    });
+    showcaseLeft.style.cursor = 'pointer';
+
+    // Initialize first slide on load
+    (function initFirst() {
+      const media = projects[0].video;
+      if (isImg(media)) { pic.src = media; pic.style.display = 'block'; img.style.display = 'none'; }
+      else { img.src = media; img.style.display = 'block'; pic.style.display = 'none'; }
+    })();
+    ttl.textContent = projects[0].title;
+    ctr.textContent = `(1/${projects.length})`;
+
+    return { nextSlide, prevSlide };
+  })();
+
+  /* ── Services Accordion ── */
+  const serviceRows = document.querySelectorAll('.svc-row');
+  let currentOpenService = null;
+
+  serviceRows.forEach(row => {
+    row.addEventListener('click', () => {
+      const serviceNum = row.dataset.service;
+      const expandedRow = document.querySelector(`.svc-row-exp[data-service="${serviceNum}"]`);
+
+      if (currentOpenService === serviceNum) {
+        // Close current row if clicking it again
+        row.classList.remove('no-re-animate');
+        row.classList.add('closing');
+        row.classList.remove('expanded-active');
+        expandedRow.classList.remove('expanded-active');
+        row.style.setProperty('--divider-distance', '0px');
+        setTimeout(() => {
+          row.classList.remove('closing');
+          row.classList.add('no-re-animate');
+        }, 500);
+        currentOpenService = null;
+      } else {
+        // Close previously open row
+        if (currentOpenService) {
+          const prevRow = document.querySelector(`.svc-row[data-service="${currentOpenService}"]`);
+          const prevExpanded = document.querySelector(`.svc-row-exp[data-service="${currentOpenService}"]`);
+          prevRow.classList.remove('no-re-animate');
+          prevRow.classList.add('closing');
+          prevRow.classList.remove('expanded-active');
+          prevExpanded.classList.remove('expanded-active');
+          prevRow.style.setProperty('--divider-distance', '0px');
+          setTimeout(() => {
+            prevRow.classList.remove('closing');
+            prevRow.classList.add('no-re-animate');
+          }, 500);
+        }
+        // Open new row - measure content height
+        row.classList.remove('no-re-animate');
+        row.classList.add('expanded-active');
+        expandedRow.classList.add('expanded-active');
+
+        // Measure actual height of expanded content
+        setTimeout(() => {
+          const contentHeight = expandedRow.scrollHeight;
+          row.style.setProperty('--divider-distance', contentHeight + 'px');
+        }, 10);
+
+        currentOpenService = serviceNum;
+      }
+    });
+  });
+
+  /* ── GAMMALAB Slideshow ── */
+  const gammaSlides = document.querySelectorAll('.gamma-slide');
+  let currentSlideIndex = 0;
+
+  function nextGammaSlide() {
+    gammaSlides[currentSlideIndex].classList.remove('gamma-slide-active');
+    gammaSlides[currentSlideIndex].style.opacity = '0';
+
+    currentSlideIndex = (currentSlideIndex + 1) % gammaSlides.length;
+
+    gammaSlides[currentSlideIndex].classList.add('gamma-slide-active');
+    gammaSlides[currentSlideIndex].style.opacity = '1';
+  }
+
+  setInterval(nextGammaSlide, 4000); // Change slide every 4 seconds
+
+  // Service row divider animation on scroll (only once)
+  const svcRows = document.querySelectorAll('.svc-row');
+  let animationStarted = false;
+
+  const observerOptions = {
+    threshold: 0.3
+  };
+
+  const rowObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !animationStarted) {
+        animationStarted = true;
+        svcRows.forEach(row => {
+          row.classList.add('line-animate');
+        });
+        // After animations complete, prevent re-animation on close
+        setTimeout(() => {
+          svcRows.forEach(row => {
+            row.classList.add('no-re-animate');
+          });
+        }, 2500);
+        rowObserver.disconnect();
+      }
+    });
+  }, observerOptions);
+
+  rowObserver.observe(svcRows[0]);
+
+  // Lightbox functionality for service images
+  setTimeout(() => {
+    const lightbox = document.createElement('div');
+    lightbox.id = 'image-lightbox';
+    lightbox.innerHTML = `
+      <div class="lightbox-overlay"></div>
+      <div class="lightbox-content">
+        <img class="lightbox-img" src="" alt="">
+      </div>
+    `;
+    document.body.appendChild(lightbox);
+
+    // Add click listeners to all service images
+    const addImageListeners = () => {
+      document.querySelectorAll('.svc-work-img img').forEach(img => {
+        if (!img.hasListener) {
+          img.style.cursor = 'pointer';
+          img.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const lightboxImg = document.querySelector('.lightbox-img');
+            lightboxImg.src = img.src;
+            lightbox.classList.add('active');
+          });
+          img.hasListener = true;
+        }
+      });
+    };
+
+    addImageListeners();
+
+    // Function to close lightbox
+    const closeLightbox = () => {
+      lightbox.classList.remove('active');
+    };
+
+    // Click ANYWHERE on the popup closes it
+    lightbox.addEventListener('click', closeLightbox);
+
+    // Listen for ESC key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      }
+    });
+  }, 500);
+</script>
+
+<style>
+  #image-lightbox {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    overflow: hidden;
+  }
+  #image-lightbox.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lightbox-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    cursor: pointer;
+  }
+  .lightbox-content {
+    position: relative;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+    box-sizing: border-box;
+  }
+  .lightbox-img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    object-position: center;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  /* Hover effect for service images */
+  .svc-work-img {
+    position: relative;
+    overflow: hidden;
+  }
+  .svc-work-img img {
+    transition: transform 0.3s ease;
+    cursor: pointer !important;
+  }
+  .svc-work-img:hover img {
+    transform: scale(1.03);
+    cursor: pointer !important;
+  }
+</style>
+
+<script src="project-popup.js"></script>
+</body>
+</html>
