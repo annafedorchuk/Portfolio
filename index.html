@@ -186,6 +186,19 @@
     .intro-text { display: flex; flex-direction: column; gap: 48px; }
 
     .h-lg { font-size: 35px; line-height: 44px; color: var(--dark); font-weight: 400; }
+    /* ── Scroll reveal system ──
+       .ink — text "fills in" word-by-word (works with any text color via opacity)
+       .svc-row.svc-in — service rows slide in left-to-right
+       .pcard.in-view — process cards drop in like the selected-work cards */
+    .ink .fw { opacity: 0.13; transition: opacity 0.5s ease; }
+    .ink.words-filled .fw { opacity: 1; }
+
+    @keyframes svcRowIn { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+    .svc-list .svc-row.svc-hidden { opacity: 0; }
+    .svc-list .svc-row.svc-in { animation: svcRowIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+    .process-cards .pcard.reveal-hidden { opacity: 0; }
+    .process-cards .pcard.in-view { animation: wcardIn 1s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .h-lg-wide { font-size: clamp(22px, calc(35/1440 * 100vw), 48px); line-height: 1.26; color: var(--dark); }
 
     .body-copy { font-size: 16px; line-height: 24px; color: var(--dark); }
@@ -217,6 +230,10 @@
       height: calc(1637/1440 * (100vw - 40px) + 80px);
     }
     .wcard { position: absolute; display: flex; flex-direction: column; gap: 16px; cursor: pointer; }
+    /* Selected work — each card gently reveals as it scrolls into view */
+    @keyframes wcardIn { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: translateY(0); } }
+    .work-grid .wcard { opacity: 0; }
+    .work-grid .wcard.in-view { animation: wcardIn 1s cubic-bezier(0.22, 1, 0.36, 1) both; }
     .wy  { font-size: 16px; line-height: 20px; letter-spacing: -0.6px; color: var(--gray); }
     .wi  { overflow: hidden; background: #ccc; align-self: stretch; }
     .wi img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -676,7 +693,7 @@
       </div>
       <div class="wcard wc3" data-project="acecare">
         <p class="wy">/ 2026</p>
-        <div class="wi"><img src="AceCare/Selected work cover.png" alt="AceCare"></div>
+        <div class="wi"><video src="AceCare/selected work cover video.mp4" autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video></div>
         <p class="wt">AceCare — Healthcare App &amp; Branding</p>
       </div>
       <div class="wcard wc4" data-project="efiros">
@@ -1413,6 +1430,120 @@
   }, observerOptions);
 
   rowObserver.observe(svcRows[0]);
+
+  // ── Scroll reveal system: ink-fill text, service rows, process cards ──
+  (function () {
+    // split an element's text into word spans; the fill cascades over ~1.2s total
+    function inkify(el) {
+      if (!el || el.classList.contains('ink')) return el;
+      el.classList.add('ink');
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      const textNodes = [];
+      while (walker.nextNode()) { if (walker.currentNode.textContent.trim()) textNodes.push(walker.currentNode); }
+      const words = [];
+      textNodes.forEach((node) => {
+        const frag = document.createDocumentFragment();
+        node.textContent.split(/(\s+)/).forEach((part) => {
+          if (part === '') return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          const s = document.createElement('span');
+          s.className = 'fw'; s.textContent = part;
+          frag.appendChild(s); words.push(s);
+        });
+        node.parentNode.replaceChild(frag, node);
+      });
+      const total = Math.max(words.length - 1, 1);
+      words.forEach((s, i) => { s.style.transitionDelay = ((i / total) * 1.2).toFixed(2) + 's'; });
+      return el;
+    }
+    // safety net: reveals are also checked on scroll, so nothing can stay hidden
+    const revealFallback = [];
+    const checkFallback = () => {
+      const vh = window.innerHeight;
+      for (let i = revealFallback.length - 1; i >= 0; i--) {
+        const t = revealFallback[i];
+        const r = t.el.getBoundingClientRect();
+        if (r.top < vh * 0.85 && r.bottom > 0) { t.el.classList.add(t.cls); revealFallback.splice(i, 1); }
+      }
+      if (!revealFallback.length) window.removeEventListener('scroll', checkFallback);
+    };
+    window.addEventListener('scroll', checkFallback, { passive: true });
+    setTimeout(checkFallback, 900);   // also check once after load (tall viewports)
+
+    function fillOnView(el, threshold) {
+      if (!el) return;
+      const obs = new IntersectionObserver((entries) => {
+        if (entries.some((e) => e.isIntersecting)) { el.classList.add('words-filled'); obs.disconnect(); }
+      }, { threshold: threshold || 0.25 });
+      obs.observe(el);
+      revealFallback.push({ el: el, cls: 'words-filled' });
+    }
+
+    // hero first text — fill after the transition overlay lifts
+    const heroDesc = inkify(document.querySelector('.hero-desc'));
+    if (heroDesc) setTimeout(() => heroDesc.classList.add('words-filled'), window.__playIntro ? 1800 : 400);
+
+    // "(My process)" label keeps the ink fill
+    fillOnView(inkify(document.querySelector('.process-intro .muted')), 0.3);
+
+    // quotes — same ink fill; q1 fills when it scrolls into view,
+    // q2/q3 when the sticky crossfade actually shows them
+    const qb = [1, 2, 3].map((n) => inkify(document.getElementById('quoteBlock' + n)));
+    fillOnView(qb[0], 0.4);
+    const quoteFill = () => {
+      let done = true;
+      [qb[1], qb[2]].forEach((b) => {
+        if (!b || b.classList.contains('words-filled')) return;
+        if (parseFloat(getComputedStyle(b).opacity) > 0.5) b.classList.add('words-filled');
+        else done = false;
+      });
+      if (done) window.removeEventListener('scroll', quoteFill);
+    };
+    window.addEventListener('scroll', quoteFill, { passive: true });
+
+    // service rows — slide in left-to-right as they enter the viewport
+    const svcRows = document.querySelectorAll('.svc-list .svc-row');
+    svcRows.forEach((r, i) => {
+      r.classList.add('svc-hidden');
+      r.style.animationDelay = ((i % 5) * 0.08).toFixed(2) + 's';
+    });
+    const rowObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('svc-in'); rowObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.3, rootMargin: '0px 0px -10% 0px' });
+    svcRows.forEach((r) => { rowObs.observe(r); revealFallback.push({ el: r, cls: 'svc-in' }); });
+
+    // process cards (Discover / Define / Design / Deliver) — drop in like the work cards
+    const pcards = document.querySelectorAll('.process-cards .pcard');
+    pcards.forEach((c, i) => {
+      c.classList.add('reveal-hidden');
+      c.style.animationDelay = (i * 0.08).toFixed(2) + 's';
+    });
+    const pcObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { e.target.classList.add('in-view'); pcObs.unobserve(e.target); }
+      });
+    }, { threshold: 0.15, rootMargin: '0px 0px -15% 0px' });
+    pcards.forEach((c) => { pcObs.observe(c); revealFallback.push({ el: c, cls: 'in-view' }); });
+  })();
+
+  // Selected work — reveal each card as it enters the viewport
+  (function () {
+    const cards = document.querySelectorAll('.work-grid .wcard');
+    if (!cards.length) return;
+    const wgObserver = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('in-view');
+          wgObserver.unobserve(e.target);
+        }
+      });
+      // trigger only once the card has scrolled well into view (bottom 25% of the
+      // viewport is ignored), so each card animates as you actually reach it
+    }, { threshold: 0.15, rootMargin: '0px 0px -25% 0px' });
+    cards.forEach((c) => wgObserver.observe(c));
+  })();
 
   // Lightbox functionality for service images
   setTimeout(() => {

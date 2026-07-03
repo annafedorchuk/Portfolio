@@ -109,6 +109,16 @@
     .pr-rows.lines-in .pr-row:nth-child(4)::before { transition-delay: 0.3s; }
     .pr-rows.lines-in .pr-row:nth-child(5)::before { transition-delay: 0.4s; }
     .pr-rows.lines-in .pr-row:nth-child(6)::before { transition-delay: 0.5s; }
+    /* rows slide in left-to-right together with the divider lines */
+    @keyframes prRowIn { from { opacity: 0; transform: translateX(-40px); } to { opacity: 1; transform: translateX(0); } }
+    .pr-rows .pr-row { opacity: 0; }
+    .pr-rows.lines-in .pr-row { animation: prRowIn 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+    .pr-rows.lines-in .pr-row:nth-child(1) { animation-delay: 0s; }
+    .pr-rows.lines-in .pr-row:nth-child(2) { animation-delay: 0.08s; }
+    .pr-rows.lines-in .pr-row:nth-child(3) { animation-delay: 0.16s; }
+    .pr-rows.lines-in .pr-row:nth-child(4) { animation-delay: 0.24s; }
+    .pr-rows.lines-in .pr-row:nth-child(5) { animation-delay: 0.32s; }
+    .pr-rows.lines-in .pr-row:nth-child(6) { animation-delay: 0.4s; }
     .pr-rows .pr-row:last-child { border-bottom: 1px solid var(--gray); }
 
     .pr-num {
@@ -121,7 +131,12 @@
       display: block; cursor: pointer;
       font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
       font-size: 14px; line-height: 19px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--dark);
+      transition: transform 0.3s ease;
     }
+    /* hover — same as the home-page accordion: the title slides right, the dot pulses */
+    .pr-row:hover .pr-title { transform: translateX(32px); }
+    .pr-row:hover .pr-dot { animation: pr-pulse-dot 1.4s ease-in-out infinite; }
+    @keyframes pr-pulse-dot { 0%, 100% { transform: scale(1); } 50% { transform: scale(2.5); } }
     .pr-content {
       max-height: 0; overflow: hidden; opacity: 0;
       transition: max-height 0.6s cubic-bezier(0.22,1,0.36,1), opacity 0.5s ease, margin-top 0.6s ease;
@@ -243,4 +258,31 @@
       width: 72vw; height: auto; max-height: 82vh;
       object-fit: cover; display: block; flex: 0 0 auto;
       pointer-events: none; -webkit-user-drag: none;
+    }
+
+    /* ── Mobile gate — "open on desktop" screen shown only on phones (Figma 380-4025) ── */
+    .mobile-gate { display: none; }
+    @media (max-width: 768px) {
+      html, body { overflow: hidden; }
+      .mobile-gate {
+        display: flex; position: fixed; inset: 0; z-index: 2147483000;
+        background: var(--cream);
+        flex-direction: column; align-items: center; justify-content: center;
+        padding: 40px 24px;
+      }
+      .mg-inner { display: flex; flex-direction: column; align-items: center; text-align: center; }
+      .mg-mark { width: 78px; height: 78px; display: block; }
+      .mg-name { margin-top: 64px; width: min(274px, 78vw); }
+      .mg-name img { width: 100%; height: auto; display: block; }
+      .mg-text {
+        margin: 24px 0 0; width: 241px; max-width: 100%;
+        font-family: 'Apfel Grotezk', 'Helvetica Neue', sans-serif;
+        font-size: 12px; line-height: 17px; letter-spacing: -0.018em;
+        color: var(--gray); text-align: center;
+      }
+      .mg-mail {
+        position: absolute; bottom: 40px; left: 0; right: 0;
+        font-family: 'Xanh Mono', monospace; font-size: 16px; line-height: 24px;
+        color: var(--dark); text-align: center; text-decoration: none;
+      }
     }
