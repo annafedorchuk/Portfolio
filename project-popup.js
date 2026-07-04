@@ -135,7 +135,7 @@
         ],
         behance: 'https://www.behance.net/gallery/228882403/Meditation-app',
         image: 'aura/project overview/cover.png',
-        bigImage: 'aura/project overview/big image.png',
+        bigImage: 'aura/project overview/big image video.mp4',
         process: {
           heading: 'Meditation and wellness app designed to make mindfulness more accessible, personalized, and engaging.',
           intro: [
@@ -177,7 +177,7 @@
           'aura/project overview/autoslider/4.png',
           'aura/project overview/autoslider/5.png',
           'aura/project overview/autoslider/6.png',
-          'aura/project overview/autoslider/_Full Review of Devices.mp4'
+          'aura/project overview/autoslider/Full Review of Devices.mp4'
         ],
         outro: {
           heading: 'Designed for Focus, Balance, and Daily Growth',
@@ -611,9 +611,11 @@
       buildSlider(d.slider);
       ppInner.scrollTop = 0;
       popup.classList.add('open');
+      document.documentElement.classList.add('pp-scroll-lock');   // freeze the page behind
     }
     function closeProject() {
       popup.classList.remove('open');
+      document.documentElement.classList.remove('pp-scroll-lock');
       if (sliderRAF) { cancelAnimationFrame(sliderRAF); sliderRAF = null; }
     }
     window.openProject = openProject;

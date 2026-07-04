@@ -330,7 +330,10 @@
       transform: translateY(100%);
       transition: transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
       overflow-y: auto; overflow-x: hidden;
+      overscroll-behavior: contain;   /* don't chain scroll to the page behind */
     }
+    /* lock the background from scrolling while the popup is open */
+    html.pp-scroll-lock, html.pp-scroll-lock body { overflow: hidden; }
     .project-popup.open .pp-inner { transform: translateY(0); }
     /* hero = first screen (minus the sticky bar) */
     .pp-hero { position: relative; height: calc(100vh - 86px - 72px); }
@@ -1051,7 +1054,7 @@
       ['gamma/project overwiew/autoslider/5.png',        'gammalab'],
       ['AceCare/project overview/gallery 2/1.png',       'acecare'],
       // videos (one lightweight clip per project)
-      ['aura/project overview/autoslider/_Full Review of Devices.mp4', 'aura'],
+      ['aura/project overview/autoslider/Full Review of Devices.mp4', 'aura'],
       ['efiros/project overview/gallery 1/1.mp4',        'efiros'],
       ['faith/project overview/big image.mp4',           'faith'],
       ['gamma/project overwiew/big video.mp4',           'gammalab'],
@@ -1392,7 +1395,7 @@
         ],
         behance: 'https://www.behance.net/gallery/228882403/Meditation-app',
         image: 'aura/project overview/cover.png',
-        bigImage: 'aura/project overview/big image.png',
+        bigImage: 'aura/project overview/big image video.mp4',
         process: {
           heading: 'Meditation and wellness app designed to make mindfulness more accessible, personalized, and engaging.',
           intro: [
@@ -1434,7 +1437,7 @@
           'aura/project overview/autoslider/4.png',
           'aura/project overview/autoslider/5.png',
           'aura/project overview/autoslider/6.png',
-          'aura/project overview/autoslider/_Full Review of Devices.mp4'
+          'aura/project overview/autoslider/Full Review of Devices.mp4'
         ],
         outro: {
           heading: 'Designed for Focus, Balance, and Daily Growth',
@@ -1868,9 +1871,11 @@
       buildSlider(d.slider);
       ppInner.scrollTop = 0;
       popup.classList.add('open');
+      document.documentElement.classList.add('pp-scroll-lock');   // freeze the page behind
     }
     function closeProject() {
       popup.classList.remove('open');
+      document.documentElement.classList.remove('pp-scroll-lock');
       if (sliderRAF) { cancelAnimationFrame(sliderRAF); sliderRAF = null; }
     }
     window.openProject = openProject;
