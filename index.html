@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Xanh+Mono:ital@0;1&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    ::selection { background: #FFC79E; color: #0D0D0D; }
+    ::-moz-selection { background: #FFC79E; color: #0D0D0D; }
 
     :root {
       --cream: #FFFCF7;
@@ -566,7 +568,7 @@
 <header>
   <div class="nav-left">
     <span class="nav-dot"></span>
-    <a href="#about">About</a>
+    <a href="about.html">About</a>
   </div>
   <div class="header-logo">
     <svg viewBox="0 0 274 26" xmlns="http://www.w3.org/2000/svg">
@@ -1023,10 +1025,10 @@
       setTimeout(() => { window.location.href = url; }, 820);
     };
 
-    document.querySelectorAll('a[href="work.html"]').forEach(link => {
+    document.querySelectorAll('a[href="work.html"], a[href="about.html"]').forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
-        window.leaveTo('work.html');
+        window.leaveTo(link.getAttribute('href'));
       });
     });
   })();

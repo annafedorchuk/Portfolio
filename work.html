@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Xanh+Mono:ital@0;1&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    ::selection { background: #FFC79E; color: #0D0D0D; }
+    ::-moz-selection { background: #FFC79E; color: #0D0D0D; }
 
     :root {
       --cream: #FFFCF7;
@@ -659,7 +661,7 @@
 <header>
   <div class="nav-left">
     <span class="nav-dot"></span>
-    <a href="index.html#about">About</a>
+    <a href="about.html">About</a>
   </div>
   <div class="header-logo">
     <a href="index.html">
@@ -961,6 +963,13 @@
       link.addEventListener('click', (e) => {
         e.preventDefault();
         window.leaveTo('index.html');
+      });
+    });
+    // "About" link → about page with transition
+    document.querySelectorAll('a[href="about.html"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.leaveTo('about.html');
       });
     });
   })();
