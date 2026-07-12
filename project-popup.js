@@ -422,6 +422,31 @@
       }
       return el;
     }
+
+    // black placeholder with a progress bar shown on a container until its media has loaded
+    function mediaPlaceholder(container) {
+      if (!container) return;
+      let pending = 0;
+      const done = () => { if (--pending <= 0) container.classList.remove('media-loading'); };
+      container.querySelectorAll('img, video').forEach((m) => {
+        if (getComputedStyle(m).display === 'none') return;   // skip hidden media (e.g. hover videos)
+        if (m.tagName === 'IMG') {
+          if (m.complete && m.naturalWidth > 0) return;
+          pending++;
+          m.addEventListener('load', done, { once: true });
+          m.addEventListener('error', done, { once: true });
+        } else {
+          if (m.readyState >= 2) return;
+          pending++;
+          m.addEventListener('loadeddata', done, { once: true });
+          m.addEventListener('error', done, { once: true });
+        }
+      });
+      if (pending > 0) {
+        container.classList.add('media-loading');
+        setTimeout(() => container.classList.remove('media-loading'), 15000);   // safety net
+      }
+    }
     const ppComp4 = document.getElementById('ppComp4');
     const ppComp5 = document.getElementById('ppComp5');
     const ppSlider = document.getElementById('ppSlider');
@@ -609,14 +634,25 @@
       buildGallery(d.gallery);
       buildGallery(d.endGallery, ppEndGallery);
       buildSlider(d.slider);
+      // loading placeholders (black cover + progress bar) until each block's media is ready
+      mediaPlaceholder(document.querySelector('.pp-right'));
+      mediaPlaceholder(ppBigImg);
+      document.querySelectorAll('#ppComp4 .comp-item, #ppComp5 .comp-item').forEach(mediaPlaceholder);
+      [ppGallery, ppEndGallery].forEach((g) => {
+        g.querySelectorAll('.comp-item, .pp-grow, .pp-gfull').forEach(mediaPlaceholder);
+      });
+      mediaPlaceholder(ppSlider);
       ppInner.scrollTop = 0;
       popup.classList.add('open');
       document.documentElement.classList.add('pp-scroll-lock');   // freeze the page behind
+      // shareable link: the URL now points straight at this project (e.g. …#aura)
+      try { history.replaceState(null, '', '#' + key); } catch (e) {}
     }
     function closeProject() {
       popup.classList.remove('open');
       document.documentElement.classList.remove('pp-scroll-lock');
       if (sliderRAF) { cancelAnimationFrame(sliderRAF); sliderRAF = null; }
+      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
     }
     window.openProject = openProject;
 
@@ -636,5 +672,12 @@
     // cursor hover on popup close
     document.getElementById('ppClose').addEventListener('mouseenter', () => cursorDot.classList.add('cursor-hover'));
     document.getElementById('ppClose').addEventListener('mouseleave', () => cursorDot.classList.remove('cursor-hover'));
+
+    // loading placeholders for the static page media (hero photos, work cards, grid covers, about photos)
+    document.querySelectorAll('.photo-clip, .wi, .gc-img, .ap-photo').forEach(mediaPlaceholder);
+
+    // deep link: a shared URL like …work.html#aura opens that project right away
+    const hashKey = decodeURIComponent(location.hash.replace('#', ''));
+    if (hashKey && PROJECTS[hashKey]) openProject(hashKey);
   window.openProject=openProject;
 })();

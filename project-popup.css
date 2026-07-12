@@ -247,6 +247,29 @@
     .acecare3 .ci1 { left: 7.92%;  top: 14.81%; width: 44.72%; height: 85.19%; z-index: 1; } /* tall mock (left) */
     .acecare3 .ci2 { left: 61.74%; top: 28.51%; width: 30.35%; height: 57.80%; z-index: 2; } /* shot (right) */
 
+    /* ── media loading placeholder — black cover with a white progress bar ── */
+    .media-loading { position: relative; }
+    .media-loading::before {
+      content: ''; position: absolute; inset: 0; z-index: 6;
+      background: #0D0D0D;
+    }
+    .media-loading::after {
+      content: ''; position: absolute; z-index: 7;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: min(46%, 420px); height: 2px;
+      background-color: rgba(255, 255, 255, 0.16);
+      background-image: linear-gradient(#fff, #fff);
+      background-repeat: no-repeat; background-size: 15% 100%;
+      animation: mloadBar 1.5s ease-in-out infinite;
+    }
+    @keyframes mloadBar {
+      0%   { background-size: 12% 100%; }
+      70%  { background-size: 85% 100%; }
+      100% { background-size: 100% 100%; }
+    }
+    /* containers whose height collapses while media is unloaded get a temporary frame */
+    .pp-bigimg.media-loading, .pp-gfull.media-loading, .pp-grow.media-loading, .pp-slider.media-loading { min-height: 42vh; }
+
     /* draggable autoslider */
     .pp-slider {
       overflow: hidden;
