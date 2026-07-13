@@ -447,6 +447,31 @@
         setTimeout(() => container.classList.remove('media-loading'), 15000);   // safety net
       }
     }
+
+    // media blocks rise + fade in as they scroll into view inside the popup
+    let ppRevealObserver = null;
+    let ppRevealTargets = [];
+    function ppRevealSetup(els) {
+      if (ppRevealObserver) { ppRevealObserver.disconnect(); ppRevealObserver = null; }
+      ppRevealTargets = els.filter(Boolean);
+      ppRevealTargets.forEach((el) => { el.classList.add('pp-reveal'); el.classList.remove('in-view'); });
+      ppRevealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) { e.target.classList.add('in-view'); ppRevealObserver.unobserve(e.target); }
+        });
+      }, { threshold: 0.12 });
+      ppRevealTargets.forEach((el) => ppRevealObserver.observe(el));
+    }
+    // fallback: reveal on popup scroll too, so nothing can stay hidden
+    document.getElementById('ppInner').addEventListener('scroll', () => {
+      for (let i = ppRevealTargets.length - 1; i >= 0; i--) {
+        const r = ppRevealTargets[i].getBoundingClientRect();
+        if (r.top < window.innerHeight * 0.92 && r.bottom > 0) {
+          ppRevealTargets[i].classList.add('in-view');
+          ppRevealTargets.splice(i, 1);
+        }
+      }
+    }, { passive: true });
     const ppComp4 = document.getElementById('ppComp4');
     const ppComp5 = document.getElementById('ppComp5');
     const ppSlider = document.getElementById('ppSlider');
@@ -642,6 +667,16 @@
         g.querySelectorAll('.comp-item, .pp-grow, .pp-gfull').forEach(mediaPlaceholder);
       });
       mediaPlaceholder(ppSlider);
+      // scroll-in reveal for every media block (big image, galleries, composites, slider)
+      const revealEls = [ppBigImg, ppSlider];
+      [ppGallery, ppEndGallery].forEach((g) => revealEls.push(...g.querySelectorAll('.pp-grow, .pp-gfull')));
+      document.querySelectorAll('#ppComp4 .comp-item, #ppComp5 .comp-item').forEach((el) => revealEls.push(el));
+      [ppGallery, ppEndGallery].forEach((g) => {
+        g.querySelectorAll('.pp-comp').forEach((c) => {
+          c.querySelectorAll('.comp-item').forEach((ci, i) => { ci.style.animationDelay = (i * 0.12).toFixed(2) + 's'; revealEls.push(ci); });
+        });
+      });
+      ppRevealSetup(revealEls);
       ppInner.scrollTop = 0;
       popup.classList.add('open');
       document.documentElement.classList.add('pp-scroll-lock');   // freeze the page behind

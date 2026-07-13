@@ -247,6 +247,11 @@
     .acecare3 .ci1 { left: 7.92%;  top: 14.81%; width: 44.72%; height: 85.19%; z-index: 1; } /* tall mock (left) */
     .acecare3 .ci2 { left: 61.74%; top: 28.51%; width: 30.35%; height: 57.80%; z-index: 2; } /* shot (right) */
 
+    /* ── media blocks gently rise + fade in as they scroll into view ── */
+    @keyframes ppMediaIn { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+    .pp-reveal { opacity: 0; }
+    .pp-reveal.in-view { animation: ppMediaIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
     /* ── media loading placeholder — black cover with a white progress bar ── */
     .media-loading { position: relative; }
     .media-loading::before {
