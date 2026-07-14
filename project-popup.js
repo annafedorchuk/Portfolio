@@ -314,7 +314,7 @@
         ],
         behance: 'https://www.behance.net/gallery/226776733/Giving-platform',
         image: 'faith/project overview/cover.png',
-        bigImage: 'faith/project overview/big image.mp4',
+        bigImageCols: ['faith/project overview/video left side.mp4', 'faith/project overview/right image.png'],
         process: {
           heading: 'Giving platform redesign focused on transparency, engagement, and meaningful charitable impact.',
           intro: [
@@ -642,7 +642,13 @@
         ppBehanceBlock.style.display = 'none';
       }
       ppImage.src = d.image;
-      ppBigImg.innerHTML = d.bigImage ? mediaTag(d.bigImage) : '';
+      if (d.bigImageCols) {
+        ppBigImg.className = 'pp-bigimg pp-bigimg-2col';
+        ppBigImg.innerHTML = d.bigImageCols.map((src) => `<div class="bi-col">${mediaTag(src)}</div>`).join('');
+      } else {
+        ppBigImg.className = 'pp-bigimg';
+        ppBigImg.innerHTML = d.bigImage ? mediaTag(d.bigImage) : '';
+      }
       ppComp4.innerHTML = d.comp4
         ? `<div class="comp-item c-navy"><img src="${d.comp4.navy}" alt=""></div>` +
           `<div class="comp-item c-laptop"><img src="${d.comp4.laptop}" alt=""></div>` +
@@ -661,14 +667,23 @@
       buildSlider(d.slider);
       // loading placeholders (black cover + progress bar) until each block's media is ready
       mediaPlaceholder(document.querySelector('.pp-right'));
-      mediaPlaceholder(ppBigImg);
+      if (d.bigImageCols) {
+        ppBigImg.querySelectorAll('.bi-col').forEach(mediaPlaceholder);
+      } else {
+        mediaPlaceholder(ppBigImg);
+      }
       document.querySelectorAll('#ppComp4 .comp-item, #ppComp5 .comp-item').forEach(mediaPlaceholder);
       [ppGallery, ppEndGallery].forEach((g) => {
         g.querySelectorAll('.comp-item, .pp-grow, .pp-gfull').forEach(mediaPlaceholder);
       });
       mediaPlaceholder(ppSlider);
       // scroll-in reveal for every media block (big image, galleries, composites, slider)
-      const revealEls = [ppBigImg, ppSlider];
+      const revealEls = [ppSlider];
+      if (d.bigImageCols) {
+        ppBigImg.querySelectorAll('.bi-col').forEach((el, i) => { el.style.animationDelay = (i * 0.12).toFixed(2) + 's'; revealEls.push(el); });
+      } else {
+        revealEls.push(ppBigImg);
+      }
       [ppGallery, ppEndGallery].forEach((g) => revealEls.push(...g.querySelectorAll('.pp-grow, .pp-gfull')));
       document.querySelectorAll('#ppComp4 .comp-item, #ppComp5 .comp-item').forEach((el) => revealEls.push(el));
       [ppGallery, ppEndGallery].forEach((g) => {

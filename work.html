@@ -400,6 +400,10 @@
     .pp-bigimg { width: 100%; padding: 0 var(--m); box-sizing: border-box; }
     .pp-bigimg:empty { display: none; }
     .pp-bigimg img, .pp-bigimg video { width: 100%; height: auto; display: block; }
+    /* two-column variant (Figma 624-10521): two equal panels, 24px gap, each keeping the 687:740 frame ratio */
+    .pp-bigimg.pp-bigimg-2col { display: flex; gap: 24px; }
+    .pp-bigimg-2col .bi-col { flex: 1 1 0; aspect-ratio: 687 / 740; overflow: hidden; }
+    .pp-bigimg-2col .bi-col img, .pp-bigimg-2col .bi-col video { width: 100%; height: 100%; object-fit: cover; display: block; }
 
     /* ── Process accordion ── */
     .pp-process { padding: 144px var(--m) 40px; }
@@ -581,7 +585,7 @@
       content: ''; position: absolute; z-index: 7;
       left: 50%; top: 50%; transform: translate(-50%, -50%);
       width: min(46%, 420px); height: 2px;
-      background-color: rgba(255, 255, 255, 0.16);
+      background-color: rgba(255, 255, 255, 0.30);   /* the full track stays clearly visible on black */
       background-image: linear-gradient(#fff, #fff);
       background-repeat: no-repeat; background-size: 15% 100%;
       animation: mloadBar 1.5s ease-in-out infinite;
@@ -1130,8 +1134,6 @@
       const rad = 300 + ((i * 97) % 780);  // 300–1080px from axis
       const x = Math.cos(ang) * rad * 1.25; // wider horizontally
       const y = Math.sin(ang) * rad * 0.82;
-      // tunnel images evenly spread along the depth; extras reuse the spread (they fade before the tunnel)
-      const baseZ = FAR + ((i % TUNNEL_COUNT) / TUNNEL_COUNT) * SPAN;
 
       // keep each item's real proportions — size the box to the media's natural aspect, never crop
       const setBox = (mw, mh) => { if (mw && mh) a.style.height = Math.round(w * mh / mw) + 'px'; };
@@ -1149,7 +1151,18 @@
       a.appendChild(media);
       tunnel.appendChild(a);
 
-      items.push({ el: a, x, y, baseZ });
+      items.push({ el: a, x, y });
+    }
+
+    // pick the flying subset evenly across the WHOLE grid (top rows and bottom rows alike),
+    // instead of just the first TUNNEL_COUNT items — otherwise the tunnel only used the top rows
+    const tunnelItems = [];
+    for (let k = 0; k < TUNNEL_COUNT; k++) {
+      const idx = Math.min(COUNT - 1, Math.floor((k * COUNT) / TUNNEL_COUNT));
+      const it = items[idx];
+      it.isTunnel = true;
+      it.baseZ = FAR + (k / TUNNEL_COUNT) * SPAN;   // evenly spread along the depth
+      tunnelItems.push(it);
     }
 
     // motion state — images auto-advance; scroll/drag only changes the speed
@@ -1199,8 +1212,8 @@
     function frame() {
       vel += (BASE - vel) * 0.04;   // ease speed back to baseline
       pos += vel;
-      for (let i = 0; i < TUNNEL_COUNT; i++) {   // only the tunnel subset keeps moving
-        const it = items[i];
+      for (let i = 0; i < tunnelItems.length; i++) {   // only the tunnel subset keeps moving
+        const it = tunnelItems[i];
         if (it.zooming) continue;                // a clicked image runs its own zoom transition
         // z cycles FAR → NEAR; image flies from the distance toward the camera
         let z = FAR + (((it.baseZ - FAR) + pos) % SPAN + SPAN) % SPAN;
@@ -1219,6 +1232,10 @@
       const col = i % GRID_COLS, row = Math.floor(i / GRID_COLS);
       it.gridX = (col - (GRID_COLS - 1) / 2) * GRID_CX;
       it.gridY = (row - (gridRows - 1) / 2) * GRID_CY;
+      // the tunnel spot sits on the SAME ray as the grid spot (tiny jitter only) →
+      // images never cross each other's paths, they simply spread apart into the depth
+      it.x = it.gridX + (((i * 97) % 160) - 80);
+      it.y = it.gridY + (((i * 57) % 120) - 60);
       it.fadeDelay = i * 14;                       // staggered "one-by-one" appearance on the canvas
     });
     // phase boundaries (cumulative ms)
@@ -1246,7 +1263,7 @@
         const ddx = dx * (1 - t), ddy = dy * (1 - t);   // drift eases out during the glide
         for (let i = 0; i < items.length; i++) {
           const it = items[i];
-          if (i < TUNNEL_COUNT) {
+          if (it.isTunnel) {
             const op = lerp(1, tunnelOpacity(it.baseZ), fadeT);
             place(it, lerp(it.gridX + ddx, it.x, t), lerp(it.gridY + ddy, it.y, t), lerp(GRID_Z, it.baseZ, t), op);
           } else {
@@ -1575,7 +1592,7 @@
         ],
         behance: 'https://www.behance.net/gallery/226776733/Giving-platform',
         image: 'faith/project overview/cover.png',
-        bigImage: 'faith/project overview/big image.mp4',
+        bigImageCols: ['faith/project overview/video left side.mp4', 'faith/project overview/right image.png'],
         process: {
           heading: 'Giving platform redesign focused on transparency, engagement, and meaningful charitable impact.',
           intro: [
@@ -1903,7 +1920,13 @@
         ppBehanceBlock.style.display = 'none';
       }
       ppImage.src = d.image;
-      ppBigImg.innerHTML = d.bigImage ? mediaTag(d.bigImage) : '';
+      if (d.bigImageCols) {
+        ppBigImg.className = 'pp-bigimg pp-bigimg-2col';
+        ppBigImg.innerHTML = d.bigImageCols.map((src) => `<div class="bi-col">${mediaTag(src)}</div>`).join('');
+      } else {
+        ppBigImg.className = 'pp-bigimg';
+        ppBigImg.innerHTML = d.bigImage ? mediaTag(d.bigImage) : '';
+      }
       ppComp4.innerHTML = d.comp4
         ? `<div class="comp-item c-navy"><img src="${d.comp4.navy}" alt=""></div>` +
           `<div class="comp-item c-laptop"><img src="${d.comp4.laptop}" alt=""></div>` +
@@ -1922,14 +1945,23 @@
       buildSlider(d.slider);
       // loading placeholders (black cover + progress bar) until each block's media is ready
       mediaPlaceholder(document.querySelector('.pp-right'));
-      mediaPlaceholder(ppBigImg);
+      if (d.bigImageCols) {
+        ppBigImg.querySelectorAll('.bi-col').forEach(mediaPlaceholder);
+      } else {
+        mediaPlaceholder(ppBigImg);
+      }
       document.querySelectorAll('#ppComp4 .comp-item, #ppComp5 .comp-item').forEach(mediaPlaceholder);
       [ppGallery, ppEndGallery].forEach((g) => {
         g.querySelectorAll('.comp-item, .pp-grow, .pp-gfull').forEach(mediaPlaceholder);
       });
       mediaPlaceholder(ppSlider);
       // scroll-in reveal for every media block (big image, galleries, composites, slider)
-      const revealEls = [ppBigImg, ppSlider];
+      const revealEls = [ppSlider];
+      if (d.bigImageCols) {
+        ppBigImg.querySelectorAll('.bi-col').forEach((el, i) => { el.style.animationDelay = (i * 0.12).toFixed(2) + 's'; revealEls.push(el); });
+      } else {
+        revealEls.push(ppBigImg);
+      }
       [ppGallery, ppEndGallery].forEach((g) => revealEls.push(...g.querySelectorAll('.pp-grow, .pp-gfull')));
       document.querySelectorAll('#ppComp4 .comp-item, #ppComp5 .comp-item').forEach((el) => revealEls.push(el));
       [ppGallery, ppEndGallery].forEach((g) => {
