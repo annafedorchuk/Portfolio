@@ -357,7 +357,7 @@
         },
         gallery: [
           ['faith/project overview/gallery 1/1.png', 'faith/project overview/gallery 1/2.png'],
-          ['faith/project overview/gallery 2/1.png'],
+          ['faith/project overview/gallery 2/promo logo.mp4'],
           ['faith/project overview/gallery 3/1.png', 'faith/project overview/gallery 3/2.png']
         ],
         comp4: {
@@ -685,7 +685,8 @@
         revealEls.push(ppBigImg);
       }
       [ppGallery, ppEndGallery].forEach((g) => revealEls.push(...g.querySelectorAll('.pp-grow, .pp-gfull')));
-      document.querySelectorAll('#ppComp4 .comp-item, #ppComp5 .comp-item').forEach((el) => revealEls.push(el));
+      // comp4/comp5 (Faith's final composites) reveal as ONE unit, so both images appear together
+      [ppComp4, ppComp5].forEach((c) => { if (c.children.length) revealEls.push(c); });
       [ppGallery, ppEndGallery].forEach((g) => {
         g.querySelectorAll('.pp-comp').forEach((c) => {
           c.querySelectorAll('.comp-item').forEach((ci, i) => { ci.style.animationDelay = (i * 0.12).toFixed(2) + 's'; revealEls.push(ci); });
