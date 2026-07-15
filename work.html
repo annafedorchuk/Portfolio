@@ -582,19 +582,26 @@
       content: ''; position: absolute; inset: 0; z-index: 6;
       background: #0D0D0D;
     }
+    /* static track: always the full centered line, so the block never looks "empty on one side" */
     .media-loading::after {
       content: ''; position: absolute; z-index: 7;
       left: 50%; top: 50%; transform: translate(-50%, -50%);
       width: min(46%, 420px); height: 2px;
-      background-color: rgba(255, 255, 255, 0.30);   /* the full track stays clearly visible on black */
-      background-image: linear-gradient(#fff, #fff);
-      background-repeat: no-repeat; background-size: 15% 100%;
-      animation: mloadBar 1.5s ease-in-out infinite;
+      background: rgba(255, 255, 255, 0.30);
     }
-    @keyframes mloadBar {
-      0%   { background-size: 12% 100%; }
-      70%  { background-size: 85% 100%; }
-      100% { background-size: 100% 100%; }
+    /* fill: a real element (inserted by mediaPlaceholder()) that grows OUTWARD FROM THE CENTER —
+       this keeps it visually centered at every point of the animation, not just at 100% */
+    .mload-fill {
+      position: absolute; z-index: 8; pointer-events: none;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: 0; height: 2px; max-width: min(46%, 420px);
+      background: #fff;
+      animation: mloadFillGrow 1.5s ease-in-out infinite;
+    }
+    @keyframes mloadFillGrow {
+      0%   { width: 0; }
+      50%  { width: min(46%, 420px); }
+      100% { width: 0; }
     }
     /* containers whose height collapses while media is unloaded get a temporary frame */
     .pp-bigimg.media-loading, .pp-gfull.media-loading, .pp-grow.media-loading, .pp-slider.media-loading { min-height: 42vh; }
@@ -1706,8 +1713,15 @@
     // black placeholder with a progress bar shown on a container until its media has loaded
     function mediaPlaceholder(container) {
       if (!container) return;
+      const existingFill = container.querySelector(':scope > .mload-fill');
+      if (existingFill) existingFill.remove();
       let pending = 0;
-      const done = () => { if (--pending <= 0) container.classList.remove('media-loading'); };
+      const clear = () => {
+        container.classList.remove('media-loading');
+        const f = container.querySelector(':scope > .mload-fill');
+        if (f) f.remove();
+      };
+      const done = () => { if (--pending <= 0) clear(); };
       container.querySelectorAll('img, video').forEach((m) => {
         if (getComputedStyle(m).display === 'none') return;   // skip hidden media (e.g. hover videos)
         if (m.tagName === 'IMG') {
@@ -1724,7 +1738,8 @@
       });
       if (pending > 0) {
         container.classList.add('media-loading');
-        setTimeout(() => container.classList.remove('media-loading'), 15000);   // safety net
+        container.appendChild(Object.assign(document.createElement('span'), { className: 'mload-fill' }));
+        setTimeout(clear, 15000);   // safety net
       }
     }
 

@@ -426,8 +426,15 @@
     // black placeholder with a progress bar shown on a container until its media has loaded
     function mediaPlaceholder(container) {
       if (!container) return;
+      const existingFill = container.querySelector(':scope > .mload-fill');
+      if (existingFill) existingFill.remove();
       let pending = 0;
-      const done = () => { if (--pending <= 0) container.classList.remove('media-loading'); };
+      const clear = () => {
+        container.classList.remove('media-loading');
+        const f = container.querySelector(':scope > .mload-fill');
+        if (f) f.remove();
+      };
+      const done = () => { if (--pending <= 0) clear(); };
       container.querySelectorAll('img, video').forEach((m) => {
         if (getComputedStyle(m).display === 'none') return;   // skip hidden media (e.g. hover videos)
         if (m.tagName === 'IMG') {
@@ -444,7 +451,8 @@
       });
       if (pending > 0) {
         container.classList.add('media-loading');
-        setTimeout(() => container.classList.remove('media-loading'), 15000);   // safety net
+        container.appendChild(Object.assign(document.createElement('span'), { className: 'mload-fill' }));
+        setTimeout(clear, 15000);   // safety net
       }
     }
 
