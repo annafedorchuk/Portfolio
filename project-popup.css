@@ -261,7 +261,7 @@
     .pp-reveal.in-view { animation: ppMediaIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
     /* ── media loading placeholder — black cover with a white progress bar ── */
-    .media-loading { position: relative; }
+    /* each container that uses this already declares its own position (relative/absolute) */
     .media-loading::before {
       content: ''; position: absolute; inset: 0; z-index: 6;
       background: #0D0D0D;
