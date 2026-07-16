@@ -498,6 +498,9 @@
       max-height: 620px; max-width: 100%; width: auto; height: auto;
       object-fit: contain; display: block;
     }
+    /* each image/video in a gallery row gets its OWN wrapper, so each has its own loading placeholder */
+    .pp-grow-item { position: relative; display: flex; }
+    .pp-grow-item.media-loading { min-height: 240px; min-width: 240px; }
     /* full-width media row (e.g. efiros gallery 1 video) */
     .pp-gfull { position: relative; width: 100%; }
     .pp-gfull img, .pp-gfull video { width: 100%; height: auto; display: block; }
@@ -582,26 +585,25 @@
       content: ''; position: absolute; inset: 0; z-index: 6;
       background: #0D0D0D;
     }
-    /* static track: always the full centered line, so the block never looks "empty on one side" */
-    .media-loading::after {
-      content: ''; position: absolute; z-index: 7;
+    /* track: a real element (inserted by mediaPlaceholder()), fixed-width and centered ONCE —
+       this anchors the centered look permanently, so the fill sweeping inside it never
+       reads as "off-center", the way an independently-positioned fill used to. */
+    .mload-track {
+      position: absolute; z-index: 7; pointer-events: none;
       left: 50%; top: 50%; transform: translate(-50%, -50%);
       width: min(46%, 420px); height: 2px;
       background: rgba(255, 255, 255, 0.30);
+      overflow: hidden;
     }
-    /* fill: a real element (inserted by mediaPlaceholder()) that grows OUTWARD FROM THE CENTER —
-       this keeps it visually centered at every point of the animation, not just at 100% */
+    /* fill: fills left → right within the track, then resets and repeats */
     .mload-fill {
-      position: absolute; z-index: 8; pointer-events: none;
-      left: 50%; top: 50%; transform: translate(-50%, -50%);
-      width: 0; height: 2px; max-width: min(46%, 420px);
+      position: absolute; left: 0; top: 0; height: 100%; width: 0;
       background: #fff;
       animation: mloadFillGrow 1.5s ease-in-out infinite;
     }
     @keyframes mloadFillGrow {
-      0%   { width: 0; }
-      50%  { width: min(46%, 420px); }
-      100% { width: 0; }
+      0%   { width: 0%; }
+      100% { width: 100%; }
     }
     /* containers whose height collapses while media is unloaded get a temporary frame */
     .pp-bigimg.media-loading, .pp-gfull.media-loading, .pp-grow.media-loading, .pp-slider.media-loading { min-height: 42vh; }
@@ -617,9 +619,16 @@
     .pp-slider:empty { display: none; }
     .pp-slider.grabbing { cursor: grabbing; }
     .pp-track { display: flex; gap: 8px; width: max-content; will-change: transform; }
-    .pp-track img, .pp-track video {
-      width: 72vw; height: auto; max-height: 82vh;
-      object-fit: cover; display: block; flex: 0 0 auto;
+    /* each slide gets its OWN wrapper — its own loading placeholder, sized immediately (72vw)
+       so the black cover has a stable box even before the slide's media has loaded */
+    .pp-track-item {
+      position: relative; flex: 0 0 auto; overflow: hidden;
+      width: 72vw; max-height: 82vh;
+    }
+    .pp-track-item.media-loading { min-height: 40vh; }
+    .pp-track-item img, .pp-track-item video {
+      width: 100%; height: auto; max-height: 82vh;
+      object-fit: cover; display: block;
       pointer-events: none; -webkit-user-drag: none;
     }
 
@@ -1713,13 +1722,13 @@
     // black placeholder with a progress bar shown on a container until its media has loaded
     function mediaPlaceholder(container) {
       if (!container) return;
-      const existingFill = container.querySelector(':scope > .mload-fill');
-      if (existingFill) existingFill.remove();
+      const existingTrack = container.querySelector(':scope > .mload-track');
+      if (existingTrack) existingTrack.remove();
       let pending = 0;
       const clear = () => {
         container.classList.remove('media-loading');
-        const f = container.querySelector(':scope > .mload-fill');
-        if (f) f.remove();
+        const t = container.querySelector(':scope > .mload-track');
+        if (t) t.remove();
       };
       const done = () => { if (--pending <= 0) clear(); };
       container.querySelectorAll('img, video').forEach((m) => {
@@ -1738,7 +1747,9 @@
       });
       if (pending > 0) {
         container.classList.add('media-loading');
-        container.appendChild(Object.assign(document.createElement('span'), { className: 'mload-fill' }));
+        const track = document.createElement('span'); track.className = 'mload-track';
+        track.appendChild(Object.assign(document.createElement('span'), { className: 'mload-fill' }));
+        container.appendChild(track);
         setTimeout(clear, 15000);   // safety net
       }
     }
@@ -1861,7 +1872,12 @@
         } else {
           const r = document.createElement('div');
           r.className = 'pp-grow';
-          group.forEach(src => r.appendChild(makeMedia(src)));
+          group.forEach(src => {
+            const item = document.createElement('div');
+            item.className = 'pp-grow-item';
+            item.appendChild(makeMedia(src));
+            r.appendChild(item);
+          });
           target.appendChild(r);
         }
       });
@@ -1873,7 +1889,7 @@
       ppTrack.style.transform = 'translateX(0)';
       if (!imgs || !imgs.length) { ppSlider.style.display = 'none'; return; }
       ppSlider.style.display = '';
-      // duplicate the set for a seamless loop
+      // duplicate the set for a seamless loop — each slide gets its own wrapper (own loading placeholder)
       [...imgs, ...imgs].forEach(src => {
         let el;
         if (/\.(mp4|webm|mov)$/i.test(src)) {
@@ -1883,7 +1899,10 @@
           el = document.createElement('img');
           el.src = src; el.alt = '';
         }
-        ppTrack.appendChild(el);
+        const item = document.createElement('div');
+        item.className = 'pp-track-item';
+        item.appendChild(el);
+        ppTrack.appendChild(item);
       });
 
       let pos = 0, half = 0;
@@ -1960,7 +1979,8 @@
       buildGallery(d.gallery);
       buildGallery(d.endGallery, ppEndGallery);
       buildSlider(d.slider);
-      // loading placeholders (black cover + progress bar) until each block's media is ready
+      // loading placeholders (black cover + centered progress bar) — EVERY individual image/video
+      // gets its own, so each piece of media shows its own loading state independently.
       mediaPlaceholder(document.querySelector('.pp-right'));
       if (d.bigImageCols) {
         ppBigImg.querySelectorAll('.bi-col').forEach(mediaPlaceholder);
@@ -1969,16 +1989,11 @@
       }
       document.querySelectorAll('#ppComp4 .comp-item, #ppComp5 .comp-item').forEach(mediaPlaceholder);
       [ppGallery, ppEndGallery].forEach((g) => {
-        g.querySelectorAll('.comp-item, .pp-grow, .pp-gfull').forEach(mediaPlaceholder);
+        g.querySelectorAll('.comp-item, .pp-grow-item, .pp-gfull').forEach(mediaPlaceholder);
       });
-      mediaPlaceholder(ppSlider);
+      ppTrack.querySelectorAll('.pp-track-item').forEach(mediaPlaceholder);
       // scroll-in reveal for every media block (big image, galleries, composites, slider)
-      const revealEls = [ppSlider];
-      if (d.bigImageCols) {
-        ppBigImg.querySelectorAll('.bi-col').forEach((el, i) => { el.style.animationDelay = (i * 0.12).toFixed(2) + 's'; revealEls.push(el); });
-      } else {
-        revealEls.push(ppBigImg);
-      }
+      const revealEls = [ppSlider, ppBigImg];
       [ppGallery, ppEndGallery].forEach((g) => revealEls.push(...g.querySelectorAll('.pp-grow, .pp-gfull')));
       // comp4/comp5 (Faith's final composites) reveal as ONE unit, so both images appear together
       [ppComp4, ppComp5].forEach((c) => { if (c.children.length) revealEls.push(c); });

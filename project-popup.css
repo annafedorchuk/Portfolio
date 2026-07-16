@@ -179,6 +179,9 @@
       max-height: 620px; max-width: 100%; width: auto; height: auto;
       object-fit: contain; display: block;
     }
+    /* each image/video in a gallery row gets its OWN wrapper, so each has its own loading placeholder */
+    .pp-grow-item { position: relative; display: flex; }
+    .pp-grow-item.media-loading { min-height: 240px; min-width: 240px; }
     /* full-width media row (e.g. efiros gallery 1 video) */
     .pp-gfull { position: relative; width: 100%; }
     .pp-gfull img, .pp-gfull video { width: 100%; height: auto; display: block; }
@@ -263,26 +266,25 @@
       content: ''; position: absolute; inset: 0; z-index: 6;
       background: #0D0D0D;
     }
-    /* static track: always the full centered line, so the block never looks "empty on one side" */
-    .media-loading::after {
-      content: ''; position: absolute; z-index: 7;
+    /* track: a real element (inserted by mediaPlaceholder()), fixed-width and centered ONCE —
+       this anchors the centered look permanently, so the fill sweeping inside it never
+       reads as "off-center", the way an independently-positioned fill used to. */
+    .mload-track {
+      position: absolute; z-index: 7; pointer-events: none;
       left: 50%; top: 50%; transform: translate(-50%, -50%);
       width: min(46%, 420px); height: 2px;
       background: rgba(255, 255, 255, 0.30);
+      overflow: hidden;
     }
-    /* fill: a real element (inserted by mediaPlaceholder()) that grows OUTWARD FROM THE CENTER —
-       this keeps it visually centered at every point of the animation, not just at 100% */
+    /* fill: fills left → right within the track, then resets and repeats */
     .mload-fill {
-      position: absolute; z-index: 8; pointer-events: none;
-      left: 50%; top: 50%; transform: translate(-50%, -50%);
-      width: 0; height: 2px; max-width: min(46%, 420px);
+      position: absolute; left: 0; top: 0; height: 100%; width: 0;
       background: #fff;
       animation: mloadFillGrow 1.5s ease-in-out infinite;
     }
     @keyframes mloadFillGrow {
-      0%   { width: 0; }
-      50%  { width: min(46%, 420px); }
-      100% { width: 0; }
+      0%   { width: 0%; }
+      100% { width: 100%; }
     }
     /* containers whose height collapses while media is unloaded get a temporary frame */
     .pp-bigimg.media-loading, .pp-gfull.media-loading, .pp-grow.media-loading, .pp-slider.media-loading { min-height: 42vh; }
@@ -298,9 +300,16 @@
     .pp-slider:empty { display: none; }
     .pp-slider.grabbing { cursor: grabbing; }
     .pp-track { display: flex; gap: 8px; width: max-content; will-change: transform; }
-    .pp-track img, .pp-track video {
-      width: 72vw; height: auto; max-height: 82vh;
-      object-fit: cover; display: block; flex: 0 0 auto;
+    /* each slide gets its OWN wrapper — its own loading placeholder, sized immediately (72vw)
+       so the black cover has a stable box even before the slide's media has loaded */
+    .pp-track-item {
+      position: relative; flex: 0 0 auto; overflow: hidden;
+      width: 72vw; max-height: 82vh;
+    }
+    .pp-track-item.media-loading { min-height: 40vh; }
+    .pp-track-item img, .pp-track-item video {
+      width: 100%; height: auto; max-height: 82vh;
+      object-fit: cover; display: block;
       pointer-events: none; -webkit-user-drag: none;
     }
 

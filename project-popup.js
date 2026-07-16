@@ -426,13 +426,13 @@
     // black placeholder with a progress bar shown on a container until its media has loaded
     function mediaPlaceholder(container) {
       if (!container) return;
-      const existingFill = container.querySelector(':scope > .mload-fill');
-      if (existingFill) existingFill.remove();
+      const existingTrack = container.querySelector(':scope > .mload-track');
+      if (existingTrack) existingTrack.remove();
       let pending = 0;
       const clear = () => {
         container.classList.remove('media-loading');
-        const f = container.querySelector(':scope > .mload-fill');
-        if (f) f.remove();
+        const t = container.querySelector(':scope > .mload-track');
+        if (t) t.remove();
       };
       const done = () => { if (--pending <= 0) clear(); };
       container.querySelectorAll('img, video').forEach((m) => {
@@ -451,7 +451,9 @@
       });
       if (pending > 0) {
         container.classList.add('media-loading');
-        container.appendChild(Object.assign(document.createElement('span'), { className: 'mload-fill' }));
+        const track = document.createElement('span'); track.className = 'mload-track';
+        track.appendChild(Object.assign(document.createElement('span'), { className: 'mload-fill' }));
+        container.appendChild(track);
         setTimeout(clear, 15000);   // safety net
       }
     }
@@ -574,7 +576,12 @@
         } else {
           const r = document.createElement('div');
           r.className = 'pp-grow';
-          group.forEach(src => r.appendChild(makeMedia(src)));
+          group.forEach(src => {
+            const item = document.createElement('div');
+            item.className = 'pp-grow-item';
+            item.appendChild(makeMedia(src));
+            r.appendChild(item);
+          });
           target.appendChild(r);
         }
       });
@@ -586,7 +593,7 @@
       ppTrack.style.transform = 'translateX(0)';
       if (!imgs || !imgs.length) { ppSlider.style.display = 'none'; return; }
       ppSlider.style.display = '';
-      // duplicate the set for a seamless loop
+      // duplicate the set for a seamless loop — each slide gets its own wrapper (own loading placeholder)
       [...imgs, ...imgs].forEach(src => {
         let el;
         if (/\.(mp4|webm|mov)$/i.test(src)) {
@@ -596,7 +603,10 @@
           el = document.createElement('img');
           el.src = src; el.alt = '';
         }
-        ppTrack.appendChild(el);
+        const item = document.createElement('div');
+        item.className = 'pp-track-item';
+        item.appendChild(el);
+        ppTrack.appendChild(item);
       });
 
       let pos = 0, half = 0;
@@ -673,7 +683,8 @@
       buildGallery(d.gallery);
       buildGallery(d.endGallery, ppEndGallery);
       buildSlider(d.slider);
-      // loading placeholders (black cover + progress bar) until each block's media is ready
+      // loading placeholders (black cover + centered progress bar) — EVERY individual image/video
+      // gets its own, so each piece of media shows its own loading state independently.
       mediaPlaceholder(document.querySelector('.pp-right'));
       if (d.bigImageCols) {
         ppBigImg.querySelectorAll('.bi-col').forEach(mediaPlaceholder);
@@ -682,16 +693,11 @@
       }
       document.querySelectorAll('#ppComp4 .comp-item, #ppComp5 .comp-item').forEach(mediaPlaceholder);
       [ppGallery, ppEndGallery].forEach((g) => {
-        g.querySelectorAll('.comp-item, .pp-grow, .pp-gfull').forEach(mediaPlaceholder);
+        g.querySelectorAll('.comp-item, .pp-grow-item, .pp-gfull').forEach(mediaPlaceholder);
       });
-      mediaPlaceholder(ppSlider);
+      ppTrack.querySelectorAll('.pp-track-item').forEach(mediaPlaceholder);
       // scroll-in reveal for every media block (big image, galleries, composites, slider)
-      const revealEls = [ppSlider];
-      if (d.bigImageCols) {
-        ppBigImg.querySelectorAll('.bi-col').forEach((el, i) => { el.style.animationDelay = (i * 0.12).toFixed(2) + 's'; revealEls.push(el); });
-      } else {
-        revealEls.push(ppBigImg);
-      }
+      const revealEls = [ppSlider, ppBigImg];
       [ppGallery, ppEndGallery].forEach((g) => revealEls.push(...g.querySelectorAll('.pp-grow, .pp-gfull')));
       // comp4/comp5 (Faith's final composites) reveal as ONE unit, so both images appear together
       [ppComp4, ppComp5].forEach((c) => { if (c.children.length) revealEls.push(c); });
