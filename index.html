@@ -147,13 +147,15 @@
       cursor: pointer;
     }
 
-    /* Hero video hover state */
+    /* Hero video hover state — swap only once the hover video actually has a frame ready
+       (JS adds .hv-ready), so the main image/video never disappears into blank space
+       while the hover clip is still buffering. */
     .hero-video-main { display: block !important; }
     .hero-video-hover { display: none !important; }
     .hero-image-main { display: block !important; }
-    .hero-photo:hover .hero-video-main { display: none !important; }
-    .hero-photo:hover .hero-image-main { display: none !important; }
-    .hero-photo:hover .hero-video-hover { display: block !important; }
+    .hero-photo.hv-ready .hero-video-main { display: none !important; }
+    .hero-photo.hv-ready .hero-image-main { display: none !important; }
+    .hero-photo.hv-ready .hero-video-hover { display: block !important; }
 
     /* Hero cursor */
     .hero-cursor {
@@ -617,35 +619,35 @@
       <div class="hero-photo" data-url="https://www.behance.net/gallery/228882403/Meditation-app">
         <div class="photo-clip" style="position: relative;">
           <img class="hero-image-main" src="aura/image cover 2.png" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
-          <video class="hero-video-hover" src="aura/hover video 2.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
+          <video class="hero-video-hover" src="aura/hover video 2.mp4" autoplay muted loop preload="auto" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
         </div>
         <span class="hero-label">AURA — MEDITATION APP</span>
       </div>
       <div class="hero-photo" data-url="https://www.behance.net/gallery/232622849/Gamma-spectrometry-interface">
         <div class="photo-clip" style="position: relative;">
           <video class="hero-video-main" src="gamma/cover.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video>
-          <video class="hero-video-hover" src="gamma/videohover.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
+          <video class="hero-video-hover" src="gamma/videohover.mp4" autoplay muted loop preload="auto" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
         </div>
         <span class="hero-label">GAMMALAB — GAMMA SPECTROMETRY INTERFACE</span>
       </div>
       <div class="hero-photo" data-url="https://www.behance.net/gallery/226776733/Giving-platform">
         <div class="photo-clip" style="position: relative;">
           <img class="hero-image-main" src="faith/cover2.png" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
-          <video class="hero-video-hover" src="faith/Comp 3.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
+          <video class="hero-video-hover" src="faith/Comp 3.mp4" autoplay muted loop preload="auto" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
         </div>
         <span class="hero-label">Faith — Giving Platform</span>
       </div>
       <div class="hero-photo" data-url="https://efiros.com/">
         <div class="photo-clip" style="position: relative;">
           <img class="hero-image-main" src="efiros/cover.png" alt="Efiros">
-          <video class="hero-video-hover" src="efiros/videohoverhero.mp4" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
+          <video class="hero-video-hover" src="efiros/videohoverhero.mp4" autoplay muted loop preload="auto" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
         </div>
         <span class="hero-label">Efiros — Engineering</span>
       </div>
       <div class="hero-photo" data-url="acecare">
         <div class="photo-clip" style="position: relative;">
           <img class="hero-image-main" src="AceCare/AceCare.png" alt="AceCare" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;">
-          <video class="hero-video-hover" src="AceCare/VIDEO HOVER.mp4" autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
+          <video class="hero-video-hover" src="AceCare/VIDEO HOVER.mp4" autoplay muted loop preload="auto" playsinline style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: none; position: absolute; top: 0; left: 0;"></video>
         </div>
         <span class="hero-label">AceCare — Healthcare App &amp; Branding</span>
       </div>
@@ -1164,16 +1166,29 @@
       if (key && window.openProject) window.openProject(key);
     });
 
+    const hoverVideo = photo.querySelector('.hero-video-hover');
+
     photo.addEventListener('mouseenter', () => {
       heroCursor.classList.add('visible');
       cursorDot.style.opacity = '0';
       cursorRing.style.opacity = '0';
+
+      if (hoverVideo) {
+        if (hoverVideo.readyState >= 2) {
+          photo.classList.add('hv-ready');
+        } else {
+          hoverVideo.addEventListener('loadeddata', () => {
+            if (photo.matches(':hover')) photo.classList.add('hv-ready');
+          }, { once: true });
+        }
+      }
     });
 
     photo.addEventListener('mouseleave', () => {
       heroCursor.classList.remove('visible');
       cursorDot.style.opacity = '1';
       cursorRing.style.opacity = '1';
+      photo.classList.remove('hv-ready');
     });
 
     photo.addEventListener('mousemove', (e) => {
