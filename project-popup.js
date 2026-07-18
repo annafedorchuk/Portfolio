@@ -406,21 +406,41 @@
     const ppBehanceBlock = document.getElementById('ppBehanceBlock');
 
     // build an <img> or <video> element depending on the file extension
+    // videos get a deferred data-src (see lazyVideo below) so a popup with many
+    // media items doesn't try to download all of them the instant it opens
     const isVideo = (src) => /\.(mp4|webm|mov)$/i.test(src);
     function mediaTag(src) {
       return isVideo(src)
-        ? `<video src="${src}" autoplay muted loop playsinline></video>`
-        : `<img src="${src}" alt="">`;
+        ? `<video data-src="${src}" autoplay muted loop playsinline></video>`
+        : `<img src="${src}" alt="" loading="lazy">`;
     }
     function makeMedia(src) {
       let el;
       if (isVideo(src)) {
         el = document.createElement('video');
-        el.src = src; el.autoplay = true; el.muted = true; el.loop = true; el.playsInline = true;
+        el.dataset.src = src; el.autoplay = true; el.muted = true; el.loop = true; el.playsInline = true;
       } else {
-        el = document.createElement('img'); el.src = src; el.alt = '';
+        el = document.createElement('img'); el.src = src; el.alt = ''; el.loading = 'lazy';
       }
       return el;
+    }
+
+    // start loading/playing a video only once it scrolls near the viewport —
+    // otherwise every video in a popup (gallery, slider, big image) would start
+    // downloading in parallel the instant the popup opens, which is brutal on a slow connection
+    const lazyVideoObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const v = entry.target;
+        if (v.dataset.src) { v.src = v.dataset.src; delete v.dataset.src; v.load(); }
+        lazyVideoObserver.unobserve(v);
+      });
+    }, { rootMargin: '600px 0px' });
+    function lazyVideo(el) {
+      if (el && el.tagName === 'VIDEO' && el.dataset.src) lazyVideoObserver.observe(el);
+    }
+    function lazyVideosIn(container) {
+      if (container) container.querySelectorAll('video[data-src]').forEach(lazyVideo);
     }
 
     // black placeholder with a progress bar shown on a container until its media has loaded
@@ -568,19 +588,24 @@
             .map((src, i) => `<div class="comp-item ci${i + 1}">${mediaTag(src)}</div>`)
             .join('');
           target.appendChild(c);
+          lazyVideosIn(c);
         } else if (group && group.full) {
           const f = document.createElement('div');
           f.className = 'pp-gfull';
-          f.appendChild(makeMedia(group.full));
+          const media = makeMedia(group.full);
+          f.appendChild(media);
           target.appendChild(f);
+          lazyVideo(media);
         } else {
           const r = document.createElement('div');
           r.className = 'pp-grow';
           group.forEach(src => {
             const item = document.createElement('div');
             item.className = 'pp-grow-item';
-            item.appendChild(makeMedia(src));
+            const media = makeMedia(src);
+            item.appendChild(media);
             r.appendChild(item);
+            lazyVideo(media);
           });
           target.appendChild(r);
         }
@@ -598,15 +623,16 @@
         let el;
         if (/\.(mp4|webm|mov)$/i.test(src)) {
           el = document.createElement('video');
-          el.src = src; el.autoplay = true; el.muted = true; el.loop = true; el.playsInline = true;
+          el.dataset.src = src; el.autoplay = true; el.muted = true; el.loop = true; el.playsInline = true;
         } else {
           el = document.createElement('img');
-          el.src = src; el.alt = '';
+          el.src = src; el.alt = ''; el.loading = 'lazy';
         }
         const item = document.createElement('div');
         item.className = 'pp-track-item';
         item.appendChild(el);
         ppTrack.appendChild(item);
+        lazyVideo(el);
       });
 
       let pos = 0, half = 0;
@@ -667,14 +693,15 @@
         ppBigImg.className = 'pp-bigimg';
         ppBigImg.innerHTML = d.bigImage ? mediaTag(d.bigImage) : '';
       }
+      lazyVideosIn(ppBigImg);
       ppComp4.innerHTML = d.comp4
-        ? `<div class="comp-item c-navy"><img src="${d.comp4.navy}" alt=""></div>` +
-          `<div class="comp-item c-laptop"><img src="${d.comp4.laptop}" alt=""></div>` +
-          `<div class="comp-item c-family"><img src="${d.comp4.family}" alt=""></div>`
+        ? `<div class="comp-item c-navy"><img src="${d.comp4.navy}" alt="" loading="lazy"></div>` +
+          `<div class="comp-item c-laptop"><img src="${d.comp4.laptop}" alt="" loading="lazy"></div>` +
+          `<div class="comp-item c-family"><img src="${d.comp4.family}" alt="" loading="lazy"></div>`
         : '';
       ppComp5.innerHTML = d.comp5
-        ? `<div class="comp-item c-land"><img src="${d.comp5.land}" alt=""></div>` +
-          `<div class="comp-item c-card"><img src="${d.comp5.card}" alt=""></div>`
+        ? `<div class="comp-item c-land"><img src="${d.comp5.land}" alt="" loading="lazy"></div>` +
+          `<div class="comp-item c-card"><img src="${d.comp5.card}" alt="" loading="lazy"></div>`
         : '';
       ppText.innerHTML = d.outro
         ? `<div class="pp-text-col"><h3 class="pp-text-h">${d.outro.heading}</h3>${d.outro.paragraphs.map(p => `<p>${p}</p>`).join('')}</div>`
@@ -740,6 +767,7 @@
 
     // loading placeholders for the static page media (hero photos, work cards, grid covers, about photos)
     document.querySelectorAll('.photo-clip, .wi, .gc-img, .ap-photo').forEach(mediaPlaceholder);
+    document.querySelectorAll('video[data-src]').forEach(lazyVideo);
 
     // deep link: a shared URL like …work.html#aura opens that project right away
     const hashKey = decodeURIComponent(location.hash.replace('#', ''));
