@@ -287,7 +287,7 @@
           ['AceCare/project overview/gallery 2/1.png']
         ],
         slider: [
-          'AceCare/project overview/autoslider/video.mp4',
+          'AceCare/project overview/autoslider/video.webm',
           'AceCare/project overview/autoslider/2.png',
           'AceCare/project overview/autoslider/video3.mp4',
           'AceCare/project overview/autoslider/5.png',
@@ -632,7 +632,9 @@
         item.className = 'pp-track-item';
         item.appendChild(el);
         ppTrack.appendChild(item);
-        lazyVideo(el);
+        // NOTE: lazy video loading for slides is handled in tick() below, not via
+        // IntersectionObserver — the track is transformed every frame by the auto-scroll,
+        // and continuously-transformed elements report intersection unreliably in some browsers.
       });
 
       let pos = 0, half = 0;
@@ -652,6 +654,17 @@
       window.addEventListener('pointermove', onMove);
       window.addEventListener('pointerup', onUp);
 
+      // load a slide's video once it's within (or near) the visible slider area —
+      // checked directly against its own rect instead of via IntersectionObserver
+      const loadVisibleSlides = () => {
+        ppTrack.querySelectorAll('video[data-src]').forEach((v) => {
+          const r = v.getBoundingClientRect();
+          if (r.right > -600 && r.left < window.innerWidth + 600) {
+            v.src = v.dataset.src; delete v.dataset.src; v.load();
+          }
+        });
+      };
+
       function tick() {
         if (!dragging) pos -= 0.6;            // auto-scroll left
         if (half) {                           // infinite wrap
@@ -659,6 +672,7 @@
           if (pos > 0) pos -= half;
         }
         ppTrack.style.transform = `translateX(${pos}px)`;
+        loadVisibleSlides();
         sliderRAF = requestAnimationFrame(tick);
       }
       tick();
