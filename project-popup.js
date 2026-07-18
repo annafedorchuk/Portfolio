@@ -110,7 +110,7 @@
         slider: [
           'efiros/project overview/autoslider/1.png',
           'efiros/project overview/autoslider/2.png',
-          'efiros/project overview/autoslider/3.mp4',
+          'efiros/project overview/autoslider/3.webm',
           'efiros/project overview/autoslider/4.png',
           'efiros/project overview/autoslider/5.png'
         ],
@@ -134,8 +134,8 @@
           'The result is a digital product that makes mindfulness more accessible and sustainable, empowering users to create moments of calm, strengthen their focus, and support their overall wellbeing through consistent daily practice.'
         ],
         behance: 'https://www.behance.net/gallery/228882403/Meditation-app',
-        image: 'aura/project overview/cover.png',
-        bigImage: 'aura/project overview/big image video.mp4',
+        image: 'aura/project overview/cover.webp',
+        bigImage: 'aura/project overview/big image video.webm',
         process: {
           heading: 'Meditation and wellness app designed to make mindfulness more accessible, personalized, and engaging.',
           intro: [
@@ -174,10 +174,10 @@
           'aura/project overview/autoslider/1.png',
           'aura/project overview/autoslider/2.png',
           'aura/project overview/autoslider/3.png',
-          'aura/project overview/autoslider/4.png',
+          'aura/project overview/autoslider/4.webp',
           'aura/project overview/autoslider/5.png',
-          'aura/project overview/autoslider/6.png',
-          'aura/project overview/autoslider/Full Review of Devices.mp4'
+          'aura/project overview/autoslider/6.webp',
+          'aura/project overview/autoslider/Full Review of Devices.webm'
         ],
         outro: {
           heading: 'Designed for Focus, Balance, and Daily Growth',
@@ -234,7 +234,7 @@
           'gamma/project overwiew/autoslider/2.png',
           'gamma/project overwiew/autoslider/3.png',
           'gamma/project overwiew/autoslider/4.png',
-          'gamma/project overwiew/autoslider/5.png',
+          'gamma/project overwiew/autoslider/5.webp',
           'gamma/project overwiew/autoslider/6.png',
           'gamma/project overwiew/autoslider/7.png'
         ],
@@ -245,7 +245,7 @@
           ]
         },
         endGallery: [
-          { composite: 'gamma4', images: ['gamma/project overwiew/gallery 4/image.png', 'gamma/cover.mp4'] }
+          { composite: 'gamma4', images: ['gamma/project overwiew/gallery 4/image.webp', 'gamma/cover.webm'] }
         ]
       },
       acecare: {
@@ -256,7 +256,7 @@
           'The goal of this project was to create a mobile app that helps people with cancer navigate their treatment journey with confidence and peace of mind. The experience combines personalized guidance, symptom tracking, medication reminders, and trusted resources in a simple, supportive interface.',
           'The result is an accessible digital companion that empowers users to stay informed, organized, and connected throughout every stage of care.'
         ],
-        image: 'AceCare/project overview/cover.png',
+        image: 'AceCare/project overview/cover.webp',
         bigImage: 'AceCare/project overview/big image.png',
         process: {
           heading: 'A mobile app designed to support people through every stage of the cancer journey.',
@@ -283,8 +283,8 @@
           ]
         },
         gallery: [
-          { composite: 'acecare1', images: ['AceCare/project overview/gallery 1/324.png', 'AceCare/project overview/gallery 1/Image.png'] },
-          ['AceCare/project overview/gallery 2/1.png']
+          { composite: 'acecare1', images: ['AceCare/project overview/gallery 1/324.webp', 'AceCare/project overview/gallery 1/Image.png'] },
+          ['AceCare/project overview/gallery 2/1.webp']
         ],
         slider: [
           'AceCare/project overview/autoslider/video.webm',
@@ -300,7 +300,7 @@
           ]
         },
         endGallery: [
-          { composite: 'acecare3', images: ['AceCare/project overview/gallery 3/1.png', 'AceCare/project overview/gallery 3/2.png'] }
+          { composite: 'acecare3', images: ['AceCare/project overview/gallery 3/1.webp', 'AceCare/project overview/gallery 3/2.png'] }
         ]
       },
       faith: {
@@ -313,8 +313,8 @@
           'The result is a platform that transforms giving from a transactional process into a more engaging and meaningful experience.'
         ],
         behance: 'https://www.behance.net/gallery/226776733/Giving-platform',
-        image: 'faith/project overview/cover.png',
-        bigImageCols: ['faith/project overview/video left side.mp4', 'faith/project overview/right image.png'],
+        image: 'faith/project overview/cover.webp',
+        bigImageCols: ['faith/project overview/video left side.webm', 'faith/project overview/right image.png'],
         process: {
           heading: 'Giving platform redesign focused on transparency, engagement, and meaningful charitable impact.',
           intro: [
@@ -356,17 +356,17 @@
           ]
         },
         gallery: [
-          ['faith/project overview/gallery 1/1.png', 'faith/project overview/gallery 1/2.png'],
-          ['faith/project overview/gallery 2/promo logo.mp4'],
-          ['faith/project overview/gallery 3/1.png', 'faith/project overview/gallery 3/2.png']
+          ['faith/project overview/gallery 1/1.webp', 'faith/project overview/gallery 1/2.png'],
+          ['faith/project overview/gallery 2/promo logo.webm'],
+          ['faith/project overview/gallery 3/1.webp', 'faith/project overview/gallery 3/2.png']
         ],
         comp4: {
           navy: 'faith/project overview/gallery 4/3.png',
-          laptop: 'faith/project overview/gallery 4/2.png',
-          family: 'faith/project overview/gallery 4/1.png'
+          laptop: 'faith/project overview/gallery 4/2.webp',
+          family: 'faith/project overview/gallery 4/1.webp'
         },
         comp5: {
-          land: 'faith/project overview/gallery 5/2.png',
+          land: 'faith/project overview/gallery 5/2.webp',
           card: 'faith/project overview/gallery 5/1.png'
         },
         outro: {
@@ -377,14 +377,14 @@
           ]
         },
         slider: [
-          'faith/project overview/autoslider/1.png',
-          'faith/project overview/autoslider/2.png',
+          'faith/project overview/autoslider/1.webp',
+          'faith/project overview/autoslider/2.webp',
           'faith/project overview/autoslider/3.png',
           'faith/project overview/autoslider/4.png',
           'faith/project overview/autoslider/5.png',
           'faith/project overview/autoslider/6.png',
-          'faith/project overview/autoslider/7.png',
-          'faith/project overview/autoslider/8.png'
+          'faith/project overview/autoslider/7.webp',
+          'faith/project overview/autoslider/8.webp'
         ]
       }
     };
@@ -442,6 +442,24 @@
     function lazyVideosIn(container) {
       if (container) container.querySelectorAll('video[data-src]').forEach(lazyVideo);
     }
+    // fallback: the popup's inner container is CSS-transformed (slide-up animation), which makes
+    // both IntersectionObserver AND native img loading="lazy" unreliable for targets inside it —
+    // check positions directly and force-start anything near the viewport that hasn't begun loading
+    function loadVideosNearViewport() {
+      const nearViewport = (el) => {
+        const r = el.getBoundingClientRect();
+        return r.bottom > -600 && r.top < window.innerHeight + 600;
+      };
+      document.querySelectorAll('video[data-src]').forEach((v) => {
+        if (!nearViewport(v)) return;
+        lazyVideoObserver.unobserve(v);
+        v.src = v.dataset.src; delete v.dataset.src; v.load();
+      });
+      document.querySelectorAll('img[loading="lazy"]').forEach((im) => {
+        if (im.complete && im.naturalWidth > 0) return;
+        if (nearViewport(im)) im.loading = 'eager';
+      });
+    }
 
     // black placeholder with a progress bar shown on a container until its media has loaded
     function mediaPlaceholder(container) {
@@ -494,6 +512,7 @@
     }
     // fallback: reveal on popup scroll too, so nothing can stay hidden
     document.getElementById('ppInner').addEventListener('scroll', () => {
+      loadVideosNearViewport();
       for (let i = ppRevealTargets.length - 1; i >= 0; i--) {
         const r = ppRevealTargets[i].getBoundingClientRect();
         if (r.top < window.innerHeight * 0.92 && r.bottom > 0) {
@@ -751,6 +770,9 @@
       ppInner.scrollTop = 0;
       popup.classList.add('open');
       document.documentElement.classList.add('pp-scroll-lock');   // freeze the page behind
+      // load videos already near the top of the popup (the IO can miss them while
+      // the popup is animating open — see loadVideosNearViewport)
+      setTimeout(loadVideosNearViewport, 150);
       // shareable link: the URL now points straight at this project (e.g. …#aura)
       try { history.replaceState(null, '', '#' + key); } catch (e) {}
     }
