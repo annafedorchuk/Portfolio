@@ -1213,6 +1213,18 @@
       if (dragMoved > 6) { e.preventDefault(); e.stopPropagation(); }
     }, true);
 
+    // the tunnel gently bends toward the cursor, and images tilt in 3D like tunnel
+    // walls as they fly past — tracked here, smoothed and applied in frame()
+    let mTX = 0, mTY = 0;        // cursor target, normalized -1..1 from screen center
+    let bendX = 0, bendY = 0;    // smoothed bend state
+    let bendRamp = 0;            // eases the whole effect in after the intro
+    const BEND_X_MAX = 460, BEND_Y_MAX = 300;   // how far the tunnel's far end swings
+    canvas.addEventListener('pointermove', (e) => {
+      mTX = (e.clientX / window.innerWidth) * 2 - 1;
+      mTY = (e.clientY / window.innerHeight) * 2 - 1;
+    });
+    canvas.addEventListener('pointerleave', () => { mTX = 0; mTY = 0; });
+
     let rafId = null;
 
     // opacity of an image at a given tunnel depth (far = faint, near = solid)
@@ -1223,8 +1235,9 @@
       if (t > 0.9) op = (1 - t) / 0.1;
       return Math.max(0, Math.min(1, op));
     }
-    function place(it, x, y, z, op) {
-      it.el.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, ${z}px)`;
+    function place(it, x, y, z, op, ry, rx) {
+      it.el.style.transform = `translate(-50%, -50%) translate3d(${x}px, ${y}px, ${z}px)` +
+        ((ry || rx) ? ` rotateY(${(ry || 0).toFixed(2)}deg) rotateX(${(rx || 0).toFixed(2)}deg)` : '');
       it.el.style.opacity = op.toFixed(3);
       it.el.style.zIndex = Math.round(z);
     }
@@ -1232,12 +1245,25 @@
     function frame() {
       vel += (BASE - vel) * 0.04;   // ease speed back to baseline
       pos += vel;
+      // smooth the cursor-following bend and ease the whole effect in
+      bendX += (mTX - bendX) * 0.045;
+      bendY += (mTY - bendY) * 0.045;
+      bendRamp += (1 - bendRamp) * 0.02;
       for (let i = 0; i < tunnelItems.length; i++) {   // only the tunnel subset keeps moving
         const it = tunnelItems[i];
         if (it.zooming) continue;                // a clicked image runs its own zoom transition
         // z cycles FAR → NEAR; image flies from the distance toward the camera
         let z = FAR + (((it.baseZ - FAR) + pos) % SPAN + SPAN) % SPAN;
-        place(it, it.x, it.y, z, tunnelOpacity(z));
+        // bend: the far end of the tunnel swings toward the cursor (near images barely move),
+        // so the whole corridor reads as a curve you're steering through
+        const tz = (z - FAR) / SPAN;                       // 0 = far, 1 = near
+        const f = Math.pow(1 - tz, 1.7) * bendRamp;
+        const bx = bendX * BEND_X_MAX * f;
+        const by = bendY * BEND_Y_MAX * f;
+        // tilt: images angle inward like tunnel walls (stronger the further off-axis they sit)
+        const ry = Math.max(-16, Math.min(16, -(it.x + bx) / 46)) * bendRamp;
+        const rx = Math.max(-12, Math.min(12, -(it.y + by) / 55)) * bendRamp;
+        place(it, it.x + bx, it.y + by, z, tunnelOpacity(z), ry, rx);
       }
       rafId = requestAnimationFrame(frame);
     }
