@@ -1079,45 +1079,46 @@
     const canvas = document.getElementById('exploreCanvas');
     const tunnel = document.getElementById('tunnel');
 
-    // projects: [src, projectKey] — covers + gallery + slider photos + a video per project.
-    // click opens the matching project popup. interleaved so the tunnel mixes projects.
+    // projects: [thumbSrc, projectKey, fullSrc] — the tunnel loads small explore-thumbs/
+    // versions (fast even on slow connections); fullSrc is the original, swapped in on
+    // click-zoom so the enlarged image keeps full quality. interleaved to mix projects.
     const projects = [
       // covers
-      ['aura/project overview/cover.webp',                'aura'],
-      ['efiros/project overview/cover.png',              'efiros'],
-      ['faith/project overview/cover.webp',               'faith'],
-      ['gamma/project overwiew/cover.png',               'gammalab'],
-      ['AceCare/project overview/cover.webp',             'acecare'],
+      ['explore-thumbs/aura-cover.webp',    'aura',     'aura/project overview/cover.webp'],
+      ['explore-thumbs/efiros-cover.webp',  'efiros',   'efiros/project overview/cover.png'],
+      ['explore-thumbs/faith-cover.webp',   'faith',    'faith/project overview/cover.webp'],
+      ['explore-thumbs/gamma-cover.webp',   'gammalab', 'gamma/project overwiew/cover.png'],
+      ['explore-thumbs/acecare-cover.webp', 'acecare',  'AceCare/project overview/cover.webp'],
       // gallery A
-      ['aura/project overview/gallery 1/1.png',          'aura'],
-      ['efiros/project overview/gallery 2/1.png',        'efiros'],
-      ['faith/project overview/gallery 1/1.webp',         'faith'],
-      ['gamma/project overwiew/gallery 1/image 1.png',   'gammalab'],
-      ['AceCare/project overview/gallery 1/324.webp',     'acecare'],
+      ['explore-thumbs/aura-g1.webp',       'aura',     'aura/project overview/gallery 1/1.png'],
+      ['explore-thumbs/efiros-g2.webp',     'efiros',   'efiros/project overview/gallery 2/1.png'],
+      ['explore-thumbs/faith-g1.webp',      'faith',    'faith/project overview/gallery 1/1.webp'],
+      ['explore-thumbs/gamma-g1.webp',      'gammalab', 'gamma/project overwiew/gallery 1/image 1.png'],
+      ['explore-thumbs/acecare-g1.webp',    'acecare',  'AceCare/project overview/gallery 1/324.webp'],
       // gallery B
-      ['aura/project overview/gallery 3/1.png',          'aura'],
-      ['efiros/project overview/gallery 3/1.png',        'efiros'],
-      ['faith/project overview/gallery 3/1.webp',         'faith'],
-      ['gamma/project overwiew/gallery 3/image 1.png',   'gammalab'],
-      ['AceCare/project overview/gallery 3/1.webp',       'acecare'],
+      ['explore-thumbs/aura-g3.webp',       'aura',     'aura/project overview/gallery 3/1.png'],
+      ['explore-thumbs/efiros-g3.webp',     'efiros',   'efiros/project overview/gallery 3/1.png'],
+      ['explore-thumbs/faith-g3.webp',      'faith',    'faith/project overview/gallery 3/1.webp'],
+      ['explore-thumbs/gamma-g3.webp',      'gammalab', 'gamma/project overwiew/gallery 3/image 1.png'],
+      ['explore-thumbs/acecare-g3.webp',    'acecare',  'AceCare/project overview/gallery 3/1.webp'],
       // slider A
-      ['aura/project overview/autoslider/2.png',         'aura'],
-      ['efiros/project overview/autoslider/1.png',       'efiros'],
-      ['faith/project overview/autoslider/2.webp',        'faith'],
-      ['gamma/project overwiew/autoslider/2.png',        'gammalab'],
-      ['AceCare/project overview/autoslider/2.png',      'acecare'],
+      ['explore-thumbs/aura-s2.webp',       'aura',     'aura/project overview/autoslider/2.png'],
+      ['explore-thumbs/efiros-s1.webp',     'efiros',   'efiros/project overview/autoslider/1.png'],
+      ['explore-thumbs/faith-s2.webp',      'faith',    'faith/project overview/autoslider/2.webp'],
+      ['explore-thumbs/gamma-s2.webp',      'gammalab', 'gamma/project overwiew/autoslider/2.png'],
+      ['explore-thumbs/acecare-s2.webp',    'acecare',  'AceCare/project overview/autoslider/2.png'],
       // slider B
-      ['aura/project overview/autoslider/5.png',         'aura'],
-      ['efiros/project overview/autoslider/4.png',       'efiros'],
-      ['faith/project overview/autoslider/6.png',        'faith'],
-      ['gamma/project overwiew/autoslider/5.webp',        'gammalab'],
-      ['AceCare/project overview/gallery 2/1.webp',       'acecare'],
-      // videos (one lightweight clip per project)
-      ['aura/project overview/autoslider/Full Review of Devices.webm', 'aura'],
-      ['efiros/project overview/gallery 1/1.mp4',        'efiros'],
-      ['faith/project overview/big image.webm',           'faith'],
-      ['gamma/project overwiew/big video.mp4',           'gammalab'],
-      ['AceCare/project overview/autoslider/video2.mp4', 'acecare'],
+      ['explore-thumbs/aura-s5.webp',       'aura',     'aura/project overview/autoslider/5.png'],
+      ['explore-thumbs/efiros-s4.webp',     'efiros',   'efiros/project overview/autoslider/4.png'],
+      ['explore-thumbs/faith-s6.webp',      'faith',    'faith/project overview/autoslider/6.png'],
+      ['explore-thumbs/gamma-s5.webp',      'gammalab', 'gamma/project overwiew/autoslider/5.webp'],
+      ['explore-thumbs/acecare-g2.webp',    'acecare',  'AceCare/project overview/gallery 2/1.webp'],
+      // videos (small preview clips; originals stay in the popups)
+      ['explore-thumbs/aura-vid.webm',      'aura'],
+      ['explore-thumbs/efiros-vid.webm',    'efiros'],
+      ['explore-thumbs/faith-vid.webm',     'faith'],
+      ['explore-thumbs/gamma-vid.webm',     'gammalab'],
+      ['explore-thumbs/acecare-vid.webm',   'acecare'],
     ];
 
     const TUNNEL_COUNT = 14;   // how many continue into the tunnel
@@ -1141,6 +1142,7 @@
       a.className = 'g-img';
       a.href = '#';
       a.dataset.project = proj[1];   // click → open this project's popup
+      if (proj[2]) a.dataset.full = proj[2];   // original full-res source, swapped in on click-zoom
 
       const w = 84 + ((i * 31) % 64);      // 84–148px base width; height follows the image's own ratio
       a.style.width = w + 'px';
@@ -1321,6 +1323,14 @@
       const it = items.find(o => o.el === el);
       if (!it) { if (window.openProject) window.openProject(key); return; }
       zoomBusy = true; it.zooming = true;
+      // the tunnel shows a small thumb — swap in the full-res original for the zoom,
+      // so the enlarged image stays sharp (applied as soon as it finishes loading)
+      const thumbImg = el.querySelector('img');
+      if (thumbImg && el.dataset.full) {
+        const hi = new Image();
+        hi.onload = () => { if (it.zooming) thumbImg.src = hi.src; };
+        hi.src = el.dataset.full;
+      }
       exploreTip.classList.remove('show');
       cursorDot.classList.remove('cursor-hide');
       vel = 55;                                   // the rest of the tunnel eases up a little
