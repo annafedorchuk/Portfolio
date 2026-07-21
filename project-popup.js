@@ -78,7 +78,7 @@
           'The result is a professional digital experience that highlights Efiros\' capabilities, builds trust with engineering teams, and makes the platform easier to understand for potential customers.'
         ],
         website: 'efiros.com',
-        image: 'efiros/project overview/cover.png',
+        image: 'efiros/project overview/cover.webp',
         bigImage: 'efiros/project overview/big image.mp4',
         process: {
           heading: 'AI engineering platform designed to make software delivery more visible, connected, and intelligent.',
@@ -105,14 +105,14 @@
         },
         gallery: [
           { full: 'efiros/project overview/gallery 1/1.mp4' },
-          ['efiros/project overview/gallery 2/1.png', 'efiros/project overview/gallery 2/2.png']
+          ['efiros/project overview/gallery 2/1.webp', 'efiros/project overview/gallery 2/2.webp']
         ],
         slider: [
-          'efiros/project overview/autoslider/1.png',
-          'efiros/project overview/autoslider/2.png',
+          'efiros/project overview/autoslider/1.webp',
+          'efiros/project overview/autoslider/2.webp',
           'efiros/project overview/autoslider/3.webm',
-          'efiros/project overview/autoslider/4.png',
-          'efiros/project overview/autoslider/5.png'
+          'efiros/project overview/autoslider/4.webp',
+          'efiros/project overview/autoslider/5.webp'
         ],
         outro: {
           heading: 'The platform\'s advanced AI capabilities were translated into a clear and intuitive website experience.',
@@ -121,7 +121,7 @@
           ]
         },
         endGallery: [
-          { composite: 'efiros3', images: ['efiros/project overview/gallery 3/1.png', 'efiros/project overview/gallery 3/2.png', 'efiros/project overview/gallery 3/3.png'] }
+          { composite: 'efiros3', images: ['efiros/project overview/gallery 3/1.webp', 'efiros/project overview/gallery 3/2.webp', 'efiros/project overview/gallery 3/3.webp'] }
         ]
       },
       aura: {
@@ -167,15 +167,15 @@
           ]
         },
         gallery: [
-          { composite: 'aura1', images: ['aura/project overview/gallery 1/1.png', 'aura/project overview/gallery 1/2.png', 'aura/project overview/gallery 1/3.png'] },
-          ['aura/project overview/gallery 2/image1.png']
+          { composite: 'aura1', images: ['aura/project overview/gallery 1/1.webp', 'aura/project overview/gallery 1/2.webp', 'aura/project overview/gallery 1/3.webp'] },
+          ['aura/project overview/gallery 2/image1.webp']
         ],
         slider: [
-          'aura/project overview/autoslider/1.png',
-          'aura/project overview/autoslider/2.png',
-          'aura/project overview/autoslider/3.png',
+          'aura/project overview/autoslider/1.webp',
+          'aura/project overview/autoslider/2.webp',
+          'aura/project overview/autoslider/3.webp',
           'aura/project overview/autoslider/4.webp',
-          'aura/project overview/autoslider/5.png',
+          'aura/project overview/autoslider/5.webp',
           'aura/project overview/autoslider/6.webp',
           'aura/project overview/autoslider/Full Review of Devices.webm'
         ],
@@ -186,7 +186,7 @@
             'The result is a scalable mobile product that supports users at every stage of their wellness journey while creating a strong foundation for future growth and content expansion.'
           ]
         },
-        endGallery: [['aura/project overview/gallery 3/1.png', 'aura/project overview/gallery 3/2.png']]
+        endGallery: [['aura/project overview/gallery 3/1.webp', 'aura/project overview/gallery 3/2.webp']]
       },
       gammalab: {
         title: 'Gammalab — Gamma spectrometry interface',
@@ -198,7 +198,7 @@
           'The result is a professional interface that balances technical precision with usability, allowing users to focus on data analysis while reducing visual complexity and improving workflow efficiency.'
         ],
         behance: 'https://www.behance.net/gallery/232622849/Gamma-spectrometry-interface',
-        image: 'gamma/project overwiew/cover.png',
+        image: 'gamma/project overwiew/cover.webp',
         bigImage: 'gamma/project overwiew/big video.mp4',
         process: {
           heading: 'Fast and accurate gamma spectrometry interface for time critical laboratory analysis.',
@@ -225,18 +225,18 @@
           ]
         },
         gallery: [
-          { composite: 'gamma1', images: ['gamma/project overwiew/gallery 1/image 1.png', 'gamma/project overwiew/gallery 1/image 2.png'] },
-          ['gamma/project overwiew/gallery 2/image 1.png'],
-          ['gamma/project overwiew/gallery 3/image 1.png', 'gamma/project overwiew/gallery 3/image 2.png']
+          { composite: 'gamma1', images: ['gamma/project overwiew/gallery 1/image 1.webp', 'gamma/project overwiew/gallery 1/image 2.webp'] },
+          ['gamma/project overwiew/gallery 2/image 1.webp'],
+          ['gamma/project overwiew/gallery 3/image 1.webp', 'gamma/project overwiew/gallery 3/image 2.webp']
         ],
         slider: [
-          'gamma/project overwiew/autoslider/1.png',
-          'gamma/project overwiew/autoslider/2.png',
-          'gamma/project overwiew/autoslider/3.png',
-          'gamma/project overwiew/autoslider/4.png',
+          'gamma/project overwiew/autoslider/1.webp',
+          'gamma/project overwiew/autoslider/2.webp',
+          'gamma/project overwiew/autoslider/3.webp',
+          'gamma/project overwiew/autoslider/4.webp',
           'gamma/project overwiew/autoslider/5.webp',
-          'gamma/project overwiew/autoslider/6.png',
-          'gamma/project overwiew/autoslider/7.png'
+          'gamma/project overwiew/autoslider/6.webp',
+          'gamma/project overwiew/autoslider/7.webp'
         ],
         outro: {
           heading: 'A precise, data driven interface built for fast and confident gamma spectrometry analysis.',
@@ -257,7 +257,7 @@
           'The result is an accessible digital companion that empowers users to stay informed, organized, and connected throughout every stage of care.'
         ],
         image: 'AceCare/project overview/cover.webp',
-        bigImage: 'AceCare/project overview/big image.png',
+        bigImage: 'AceCare/project overview/big image.webp',
         process: {
           heading: 'A mobile app designed to support people through every stage of the cancer journey.',
           intro: [
@@ -283,14 +283,14 @@
           ]
         },
         gallery: [
-          { composite: 'acecare1', images: ['AceCare/project overview/gallery 1/324.webp', 'AceCare/project overview/gallery 1/Image.png'] },
+          { composite: 'acecare1', images: ['AceCare/project overview/gallery 1/324.webp', 'AceCare/project overview/gallery 1/Image.webp'] },
           ['AceCare/project overview/gallery 2/1.webp']
         ],
         slider: [
           'AceCare/project overview/autoslider/video.webm',
-          'AceCare/project overview/autoslider/2.png',
+          'AceCare/project overview/autoslider/2.webp',
           'AceCare/project overview/autoslider/video3.mp4',
-          'AceCare/project overview/autoslider/5.png',
+          'AceCare/project overview/autoslider/5.webp',
           'AceCare/project overview/autoslider/video2.mp4'
         ],
         outro: {
@@ -300,7 +300,7 @@
           ]
         },
         endGallery: [
-          { composite: 'acecare3', images: ['AceCare/project overview/gallery 3/1.webp', 'AceCare/project overview/gallery 3/2.png'] }
+          { composite: 'acecare3', images: ['AceCare/project overview/gallery 3/1.webp', 'AceCare/project overview/gallery 3/2.webp'] }
         ]
       },
       faith: {
@@ -314,7 +314,7 @@
         ],
         behance: 'https://www.behance.net/gallery/226776733/Giving-platform',
         image: 'faith/project overview/cover.webp',
-        bigImageCols: ['faith/project overview/video left side.webm', 'faith/project overview/right image.png'],
+        bigImageCols: ['faith/project overview/video left side.webm', 'faith/project overview/right image.webp'],
         process: {
           heading: 'Giving platform redesign focused on transparency, engagement, and meaningful charitable impact.',
           intro: [
@@ -356,18 +356,18 @@
           ]
         },
         gallery: [
-          ['faith/project overview/gallery 1/1.webp', 'faith/project overview/gallery 1/2.png'],
+          ['faith/project overview/gallery 1/1.webp', 'faith/project overview/gallery 1/2.webp'],
           ['faith/project overview/gallery 2/promo logo.webm'],
-          ['faith/project overview/gallery 3/1.webp', 'faith/project overview/gallery 3/2.png']
+          ['faith/project overview/gallery 3/1.webp', 'faith/project overview/gallery 3/2.webp']
         ],
         comp4: {
-          navy: 'faith/project overview/gallery 4/3.png',
+          navy: 'faith/project overview/gallery 4/3.webp',
           laptop: 'faith/project overview/gallery 4/2.webp',
           family: 'faith/project overview/gallery 4/1.webp'
         },
         comp5: {
           land: 'faith/project overview/gallery 5/2.webp',
-          card: 'faith/project overview/gallery 5/1.png'
+          card: 'faith/project overview/gallery 5/1.webp'
         },
         outro: {
           heading: 'A faithful giving journey begins with connection, transparency, purpose, and impact.',
@@ -379,10 +379,10 @@
         slider: [
           'faith/project overview/autoslider/1.webp',
           'faith/project overview/autoslider/2.webp',
-          'faith/project overview/autoslider/3.png',
-          'faith/project overview/autoslider/4.png',
-          'faith/project overview/autoslider/5.png',
-          'faith/project overview/autoslider/6.png',
+          'faith/project overview/autoslider/3.webp',
+          'faith/project overview/autoslider/4.webp',
+          'faith/project overview/autoslider/5.webp',
+          'faith/project overview/autoslider/6.webp',
           'faith/project overview/autoslider/7.webp',
           'faith/project overview/autoslider/8.webp'
         ]
