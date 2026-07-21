@@ -684,25 +684,25 @@
       <div class="wcard wc1" data-project="gammalab">
         <p class="wy">/ 2025</p>
         <div class="wi" style="position: relative;">
-          <video src="gamma/Comp 2.webm" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: 120% center; display: block;"></video>
+          <video data-src="gamma/Comp 2.webm" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: 120% center; display: block;"></video>
         </div>
         <p class="wt">GAMMALAB — GAMMA SPECTROMETRY INTERFACE</p>
       </div>
       <div class="wcard wc2" data-project="aura">
         <p class="wy">/ 2025</p>
         <div class="wi" style="position: relative;">
-          <video src="aura/Main Spin 02 (1920) + Global Adjustments.webm" autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video>
+          <video data-src="aura/Main Spin 02 (1920) + Global Adjustments.webm" autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video>
         </div>
         <p class="wt">AURA — MEDITATION APP</p>
       </div>
       <div class="wcard wc3" data-project="acecare">
         <p class="wy">/ 2026</p>
-        <div class="wi"><video src="AceCare/selected work cover video.webm" autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video></div>
+        <div class="wi"><video data-src="AceCare/selected work cover video.webm" autoplay muted loop playsinline style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video></div>
         <p class="wt">AceCare — Healthcare App &amp; Branding</p>
       </div>
       <div class="wcard wc4" data-project="efiros">
         <p class="wy">/ 2026</p>
-        <div class="wi"><video src="efiros/videocover.webm" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video></div>
+        <div class="wi"><video data-src="efiros/videocover.webm" autoplay muted loop style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"></video></div>
         <p class="wt">Efiros — MCP for AI agents in engineering</p>
       </div>
     </div>
@@ -1426,6 +1426,23 @@
   }
 
   setInterval(nextGammaSlide, 4000); // Change slide every 4 seconds
+
+  // Lazy-load the work-card videos (below the fold) so they don't compete with the
+  // hero for bandwidth on page load — start fetching each when it scrolls near the viewport
+  (function () {
+    const lazyVids = document.querySelectorAll('.wi video[data-src]');
+    if (!lazyVids.length) return;
+    const startVid = (v) => {
+      if (!v.dataset.src) return;
+      v.src = v.dataset.src; delete v.dataset.src; v.load();
+    };
+    const vidObserver = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { startVid(e.target); vidObserver.unobserve(e.target); }
+      });
+    }, { rootMargin: '400px 0px' });
+    lazyVids.forEach((v) => vidObserver.observe(v));
+  })();
 
   // Service row divider animation on scroll (only once)
   const svcRows = document.querySelectorAll('.svc-row');
