@@ -1113,6 +1113,36 @@
       ['explore-thumbs/faith-s6.webp',      'faith',    'faith/project overview/autoslider/6.png'],
       ['explore-thumbs/gamma-s5.webp',      'gammalab', 'gamma/project overwiew/autoslider/5.webp'],
       ['explore-thumbs/acecare-g2.webp',    'acecare',  'AceCare/project overview/gallery 2/1.webp'],
+      // gallery C
+      ['explore-thumbs/aura-g1b.webp',      'aura',     'aura/project overview/gallery 1/2.png'],
+      ['explore-thumbs/efiros-g2b.webp',    'efiros',   'efiros/project overview/gallery 2/2.png'],
+      ['explore-thumbs/faith-g4.webp',      'faith',    'faith/project overview/gallery 4/1.webp'],
+      ['explore-thumbs/gamma-g1b.webp',     'gammalab', 'gamma/project overwiew/gallery 1/image 2.png'],
+      ['explore-thumbs/acecare-g1b.webp',   'acecare',  'AceCare/project overview/gallery 1/Image.png'],
+      // gallery D
+      ['explore-thumbs/aura-g1c.webp',      'aura',     'aura/project overview/gallery 1/3.png'],
+      ['explore-thumbs/efiros-g3b.webp',    'efiros',   'efiros/project overview/gallery 3/2.png'],
+      ['explore-thumbs/faith-g5.webp',      'faith',    'faith/project overview/gallery 5/2.webp'],
+      ['explore-thumbs/gamma-g2.webp',      'gammalab', 'gamma/project overwiew/gallery 2/image 1.png'],
+      ['explore-thumbs/acecare-g3b.webp',   'acecare',  'AceCare/project overview/gallery 3/2.png'],
+      // slider C
+      ['explore-thumbs/aura-s1.webp',       'aura',     'aura/project overview/autoslider/1.png'],
+      ['explore-thumbs/efiros-s2.webp',     'efiros',   'efiros/project overview/autoslider/2.png'],
+      ['explore-thumbs/faith-s1.webp',      'faith',    'faith/project overview/autoslider/1.webp'],
+      ['explore-thumbs/gamma-s4.webp',      'gammalab', 'gamma/project overwiew/autoslider/4.png'],
+      ['explore-thumbs/acecare-s4.webp',    'acecare',  'AceCare/project overview/autoslider/4.png'],
+      // slider D
+      ['explore-thumbs/aura-s3.webp',       'aura',     'aura/project overview/autoslider/3.png'],
+      ['explore-thumbs/efiros-s5.webp',     'efiros',   'efiros/project overview/autoslider/5.png'],
+      ['explore-thumbs/faith-s4.webp',      'faith',    'faith/project overview/autoslider/4.png'],
+      ['explore-thumbs/gamma-s7.webp',      'gammalab', 'gamma/project overwiew/autoslider/7.png'],
+      ['explore-thumbs/acecare-s5.webp',    'acecare',  'AceCare/project overview/autoslider/5.png'],
+      // gallery E
+      ['explore-thumbs/aura-g3b.webp',      'aura',     'aura/project overview/gallery 3/2.png'],
+      ['explore-thumbs/efiros-g3c.webp',    'efiros',   'efiros/project overview/gallery 3/3.png'],
+      ['explore-thumbs/faith-s7.webp',      'faith',    'faith/project overview/autoslider/7.webp'],
+      ['explore-thumbs/gamma-g3b.webp',     'gammalab', 'gamma/project overwiew/gallery 3/image 2.png'],
+      ['explore-thumbs/acecare-g2b.webp',   'acecare',  'AceCare/project overview/gallery 2/1.webp'],
       // videos (small preview clips; originals stay in the popups)
       ['explore-thumbs/aura-vid.webm',      'aura'],
       ['explore-thumbs/efiros-vid.webm',    'efiros'],
@@ -1121,14 +1151,14 @@
       ['explore-thumbs/acecare-vid.webm',   'acecare'],
     ];
 
-    const TUNNEL_COUNT = 14;   // how many continue into the tunnel
+    const TUNNEL_COUNT = 20;   // how many continue into the tunnel
     // dense grid wall sized to the monitor so it always fills + overflows the edges
     const GRID_Z = -150;
     const GZ = 1000 / (1000 - GRID_Z);            // perspective scale at the grid depth (~0.87)
     const CELL_X = 360, CELL_Y = 345;             // on-screen spacing between thumbs (fewer images)
     const GRID_COLS = Math.max(7, Math.ceil(window.innerWidth  * 1.3 / CELL_X));
     const GRID_ROWS = Math.max(5, Math.ceil(window.innerHeight * 1.2 / CELL_Y));
-    const COUNT = Math.min(GRID_COLS * GRID_ROWS, 36);   // fewer images overall
+    const COUNT = Math.min(GRID_COLS * GRID_ROWS, 55);   // up to the full project set
     const GRID_CX = CELL_X / GZ, GRID_CY = CELL_Y / GZ;   // convert on-screen spacing → 3D space
     const FAR = -2600;   // furthest z (small, near vanishing point)
     const NEAR = 600;    // closest z — bigger so tunnel images come in large
@@ -1171,19 +1201,32 @@
       a.appendChild(media);
       tunnel.appendChild(a);
 
-      items.push({ el: a, x, y });
+      items.push({ el: a, x, y, projKey: proj[1] });
     }
 
-    // pick the flying subset evenly across the WHOLE grid (top rows and bottom rows alike),
-    // instead of just the first TUNNEL_COUNT items — otherwise the tunnel only used the top rows
-    const tunnelItems = [];
-    for (let k = 0; k < TUNNEL_COUNT; k++) {
-      const idx = Math.min(COUNT - 1, Math.floor((k * COUNT) / TUNNEL_COUNT));
-      const it = items[idx];
-      it.isTunnel = true;
-      it.baseZ = FAR + (k / TUNNEL_COUNT) * SPAN;   // evenly spread along the depth
-      tunnelItems.push(it);
+    // pick the flying subset with a project round-robin, so EVERY project shows up in
+    // the tunnel (a plain even slice would over-represent some projects and drop others)
+    const byProject = {};
+    items.forEach((it) => { (byProject[it.projKey] = byProject[it.projKey] || []).push(it); });
+    const projKeys = Object.keys(byProject);
+    const cursor = {}; projKeys.forEach((k) => cursor[k] = 0);
+    const picked = [];
+    const want = Math.min(TUNNEL_COUNT, items.length);
+    let guard = 0;
+    while (picked.length < want && guard < 1000) {
+      for (const k of projKeys) {
+        if (picked.length >= want) break;
+        if (cursor[k] < byProject[k].length) picked.push(byProject[k][cursor[k]++]);
+      }
+      guard++;
     }
+    // spread the picked items evenly along the tunnel's depth
+    const tunnelItems = [];
+    picked.forEach((it, k) => {
+      it.isTunnel = true;
+      it.baseZ = FAR + (k / picked.length) * SPAN;
+      tunnelItems.push(it);
+    });
 
     // motion state — images auto-advance; scroll/drag only changes the speed
     const BASE = 1.8;          // baseline auto speed (always moving)
